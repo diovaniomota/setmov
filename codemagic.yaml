@@ -6,8 +6,6 @@ workflows:
     integrations:
       app_store_connect: Codemagic Key
     environment:
-      groups:
-        - app_store_connect # Crie esse grupo nas variáveis de ambiente do Codemagic
       vars:
         APP_ID: "com.migambi.netflex" # Seu Bundle ID
         XCODE_WORKSPACE: "ios/Runner.xcworkspace"
