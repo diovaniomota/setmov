@@ -6,9 +6,6 @@ workflows:
     integrations:
       app_store_connect: Codemagic Key
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.migambi.netflex
       vars:
         APP_ID: "com.migambi.netflex"
         XCODE_WORKSPACE: "ios/Runner.xcworkspace"
@@ -18,9 +15,13 @@ workflows:
       - name: Set up keychain to be beautiful
         script: |
           keychain initialize
+      - name: Fetch signing files
+        script: |
+          app-store-connect fetch-signing-files "$APP_ID" --type IOS_APP_STORE --create
       - name: Set up code signing
         script: |
           keychain add-certificates
+          xcode-project use-profiles
       - name: Fluxo de dependências
         script: |
           flutter packages pub get
@@ -29,6 +30,20 @@ workflows:
           cd ..
       - name: Build IPA
         script: |
+          cat > /Users/builder/export_options.plist <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>destination</key>
+              <string>export</string>
+              <key>method</key>
+              <string>app-store-connect</string>
+              <key>signingStyle</key>
+              <string>automatic</string>
+          </dict>
+          </plist>
+          EOF
           flutter build ipa --release --export-options-plist=/Users/builder/export_options.plist
     artifacts:
       - build/ios/ipa/*.ipa
