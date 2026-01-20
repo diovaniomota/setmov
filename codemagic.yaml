@@ -1,0 +1,40 @@
+workflows:
+  ios-workflow:
+    name: iOS Build & Release
+    max_build_duration: 60
+    instance_type: mac_mini_m1
+    environment:
+      groups:
+        - app_store_connect # Crie esse grupo nas variáveis de ambiente do Codemagic
+      vars:
+        APP_ID: "com.migambi.netflex" # Seu Bundle ID
+        XCODE_WORKSPACE: "ios/Runner.xcworkspace"
+        XCODE_SCHEME: "Runner"
+      flutter: stable
+    scripts:
+      - name: Set up keychain to be beautiful
+        script: |
+          keychain initialize
+      - name: Fetch signing files
+        script: |
+          app-store-connect fetch-signing-files "$APP_ID" --type IOS_APP_STORE --create
+      - name: Set up signing certificate
+        script: |
+          keychain add-certificates
+      - name: Fluxo de dependências
+        script: |
+          flutter packages pub get
+          find . -name "Podfile" -exec dir {} \;
+          cd ios
+          pod install
+          cd ..
+      - name: Build IPA
+        script: |
+          flutter build ipa --release --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+    publishing:
+      app_store_connect:
+        auth: integration # Usa a chave de API configurada no Codemagic
