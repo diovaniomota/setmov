@@ -53,17 +53,13 @@ workflows:
           </plist>
           EOF
           flutter build ipa --release --export-options-plist=/tmp/ExportOptions.plist
-          echo "=== Searching for IPA ==="
-          find . -name "*.ipa" -type f 2>/dev/null
       - name: Upload to App Store Connect
         script: |
           APP_FILE=$(find . -name "*.ipa" -type f 2>/dev/null | head -1)
           echo "Found IPA: $APP_FILE"
-          if [ -n "$APP_FILE" ]; then
-            app-store-connect publish --path "$APP_FILE"
-          else
-            echo "No IPA found!"
-            exit 1
-          fi
+          xcrun altool --upload-app --type ios \
+            --file "$APP_FILE" \
+            --apiKey $APP_STORE_CONNECT_KEY_IDENTIFIER \
+            --apiIssuer $APP_STORE_CONNECT_ISSUER_ID
     artifacts:
       - "**/*.ipa"
