@@ -22,15 +22,9 @@ workflows:
         script: |
           keychain add-certificates
           xcode-project use-profiles
-      - name: Fluxo de dependências
+      - name: Create export options
         script: |
-          flutter packages pub get
-          cd ios
-          pod install
-          cd ..
-      - name: Build IPA
-        script: |
-          cat > /Users/builder/export_options.plist <<'EOF'
+          cat > $HOME/export_options.plist <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
@@ -44,7 +38,15 @@ workflows:
           </dict>
           </plist>
           EOF
-          flutter build ipa --release --export-options-plist=/Users/builder/export_options.plist
+      - name: Fluxo de dependências
+        script: |
+          flutter packages pub get
+          cd ios
+          pod install
+          cd ..
+      - name: Build IPA
+        script: |
+          flutter build ipa --release --export-options-plist=$HOME/export_options.plist
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
