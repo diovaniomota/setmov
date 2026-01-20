@@ -6,8 +6,11 @@ workflows:
     integrations:
       app_store_connect: Codemagic Key
     environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.migambi.netflex
       vars:
-        APP_ID: "com.migambi.netflex" # Seu Bundle ID
+        APP_ID: "com.migambi.netflex"
         XCODE_WORKSPACE: "ios/Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
       flutter: stable
@@ -15,16 +18,12 @@ workflows:
       - name: Set up keychain to be beautiful
         script: |
           keychain initialize
-      - name: Fetch signing files
-        script: |
-          app-store-connect fetch-signing-files "$APP_ID" --type IOS_APP_STORE --create
-      - name: Set up signing certificate
+      - name: Set up code signing
         script: |
           keychain add-certificates
       - name: Fluxo de dependências
         script: |
           flutter packages pub get
-          find . -name "Podfile" -exec dir {} \;
           cd ios
           pod install
           cd ..
@@ -37,4 +36,4 @@ workflows:
       - flutter_drive.log
     publishing:
       app_store_connect:
-        auth: integration # Usa a chave de API configurada no Codemagic
+        auth: integration
