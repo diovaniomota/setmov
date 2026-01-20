@@ -22,7 +22,7 @@ workflows:
         script: |
           keychain add-certificates
           xcode-project use-profiles
-      - name: Fluxo de dependências
+      - name: Fluxo de dependencias
         script: |
           flutter packages pub get
           cd ios
@@ -31,12 +31,39 @@ workflows:
           cd ..
       - name: Build IPA
         script: |
-          flutter build ipa --release \
-            --export-method app-store
+          cat > /tmp/ExportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store-connect</string>
+              <key>destination</key>
+              <string>export</string>
+              <key>teamID</key>
+              <string>6B5SQYBRLP</string>
+              <key>signingStyle</key>
+              <string>manual</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>com.migambi.netflex</key>
+                  <string>setmov-appstore-profile</string>
+              </dict>
+          </dict>
+          </plist>
+          EOF
+          flutter build ipa --release --export-options-plist=/tmp/ExportOptions.plist
+          echo "=== Searching for IPA ==="
+          find . -name "*.ipa" -type f 2>/dev/null
       - name: Upload to App Store Connect
         script: |
-          APP_FILE=$(find build/ios/ipa -name "*.ipa" -type f | head -1)
-          echo "Uploading: $APP_FILE"
-          app-store-connect publish --path "$APP_FILE"
+          APP_FILE=$(find . -name "*.ipa" -type f 2>/dev/null | head -1)
+          echo "Found IPA: $APP_FILE"
+          if [ -n "$APP_FILE" ]; then
+            app-store-connect publish --path "$APP_FILE"
+          else
+            echo "No IPA found!"
+            exit 1
+          fi
     artifacts:
-      - build/ios/ipa/*.ipa
+      - "**/*.ipa"
