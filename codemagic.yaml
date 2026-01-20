@@ -47,10 +47,13 @@ workflows:
       - name: Build IPA
         script: |
           flutter build ipa --release --export-options-plist=/Users/builder/export_options.plist
+          echo "IPA location:"
+          find build -name "*.ipa" -type f
     artifacts:
       - build/ios/ipa/*.ipa
-      - /tmp/xcodebuild_logs/*.log
-      - flutter_drive.log
+      - build/ios/archive/*.xcarchive
+      - "**/*.ipa"
     publishing:
       app_store_connect:
         auth: integration
+        submit_to_testflight: true
