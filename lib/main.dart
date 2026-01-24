@@ -114,11 +114,17 @@ class _MyAppState extends State<MyApp> {
 
   void _navigateToUri(Uri uri) {
     String location = uri.path;
+
+    // Handle cases where the path might be in the host (e.g. setmov://paymentSummaryCopy)
+    if (location.isEmpty && uri.host.isNotEmpty) {
+      location = uri.host;
+    }
+
     if (location.isEmpty) {
-      // Se não tiver path, não faz nada ou vai para home
       return;
     }
-    // Garantir que começa com /
+
+    // Ensure it starts with /
     if (!location.startsWith('/')) {
       location = '/$location';
     }
@@ -126,6 +132,16 @@ class _MyAppState extends State<MyApp> {
     if (uri.hasQuery) {
       location += '?${uri.query}';
     }
+
+    // Feedback visual para debug e UX
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Processando pagamento...'),
+        duration: Duration(seconds: 2),
+        backgroundColor: FlutterFlowTheme.of(context).primary,
+      ),
+    );
+
     _router.go(location);
   }
 
