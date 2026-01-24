@@ -114,6 +114,15 @@ class _MyAppState extends State<MyApp> {
 
   void _navigateToUri(Uri uri) {
     String location = uri.path;
+    if (location.isEmpty) {
+      // Se não tiver path, não faz nada ou vai para home
+      return;
+    }
+    // Garantir que começa com /
+    if (!location.startsWith('/')) {
+      location = '/$location';
+    }
+
     if (uri.hasQuery) {
       location += '?${uri.query}';
     }

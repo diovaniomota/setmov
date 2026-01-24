@@ -30,6 +30,8 @@ class _PaymentSummaryCopyWidgetState extends State<PaymentSummaryCopyWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  bool _dialogShown = false;
+
   @override
   void initState() {
     super.initState();
@@ -44,9 +46,18 @@ class _PaymentSummaryCopyWidgetState extends State<PaymentSummaryCopyWidget> {
     });
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _checkPaymentStatus();
+  }
+
   void _checkPaymentStatus() async {
+    if (_dialogShown) return;
+
     final qParams = GoRouterState.of(context).uri.queryParameters;
     if (qParams['payment_status'] == 'success') {
+      _dialogShown = true;
       await showDialog(
         context: context,
         builder: (dialogContext) {
@@ -79,6 +90,7 @@ class _PaymentSummaryCopyWidgetState extends State<PaymentSummaryCopyWidget> {
         },
       );
     } else if (qParams['payment_status'] == 'cancel') {
+      _dialogShown = true;
       await showDialog(
         context: context,
         builder: (dialogContext) {
@@ -838,9 +850,9 @@ class _PaymentSummaryCopyWidgetState extends State<PaymentSummaryCopyWidget> {
                                 coins: _model.valor,
                                 number: _model.numeroAleatorio,
                                 successUrl:
-                                    'setmov://setmov.com/paymentSummaryCopy',
+                                    'setmov://setmov.com/paymentSummaryCopy?payment_status=success',
                                 cancelUrl:
-                                    'setmov://setmov.com/paymentSummaryCopy',
+                                    'setmov://setmov.com/paymentSummaryCopy?payment_status=cancel',
                               );
 
                               if ((_model.linkCheckoutWallet?.succeeded ??
