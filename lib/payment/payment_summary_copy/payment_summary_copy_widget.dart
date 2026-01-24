@@ -38,7 +38,79 @@ class _PaymentSummaryCopyWidgetState extends State<PaymentSummaryCopyWidget> {
     _model.textController ??= TextEditingController();
     _model.textFieldFocusNode ??= FocusNode();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      safeSetState(() {});
+      _checkPaymentStatus();
+    });
+  }
+
+  void _checkPaymentStatus() async {
+    final qParams = GoRouterState.of(context).uri.queryParameters;
+    if (qParams['payment_status'] == 'success') {
+      await showDialog(
+        context: context,
+        builder: (dialogContext) {
+          return Dialog(
+            elevation: 0,
+            insetPadding: EdgeInsets.zero,
+            backgroundColor: Colors.transparent,
+            alignment: AlignmentDirectional(0.0, 0.0)
+                .resolve(Directionality.of(context)),
+            child: WebViewAware(
+              child: GestureDetector(
+                onTap: () {
+                  FocusScope.of(dialogContext).unfocus();
+                  FocusManager.instance.primaryFocus?.unfocus();
+                },
+                child: SuccessDialogWidget(
+                  title: 'Compra realizada com sucesso!',
+                  shortDesc: 'Parabéns! Suas moedas já estão disponíveis.',
+                  doneText: 'Fechar',
+                  successIcon: Icon(
+                    Icons.check_sharp,
+                  ),
+                  doneAction: () async {
+                    context.pushNamed(HomeWidget.routeName);
+                  },
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    } else if (qParams['payment_status'] == 'cancel') {
+      await showDialog(
+        context: context,
+        builder: (dialogContext) {
+          return Dialog(
+            elevation: 0,
+            insetPadding: EdgeInsets.zero,
+            backgroundColor: Colors.transparent,
+            alignment: AlignmentDirectional(0.0, 0.0)
+                .resolve(Directionality.of(context)),
+            child: WebViewAware(
+              child: GestureDetector(
+                onTap: () {
+                  FocusScope.of(dialogContext).unfocus();
+                  FocusManager.instance.primaryFocus?.unfocus();
+                },
+                child: SuccessDialogWidget(
+                  title: 'Pagamento cancelado',
+                  shortDesc: 'A operação foi cancelada pelo usuário.',
+                  doneText: 'Fechar',
+                  successIcon: Icon(
+                    Icons.close,
+                  ),
+                  doneAction: () async {
+                    context.pushNamed(PaymentSummaryCopyWidget.routeName);
+                  },
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
   }
 
   @override
