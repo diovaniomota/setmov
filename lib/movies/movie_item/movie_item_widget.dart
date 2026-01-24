@@ -12,8 +12,7 @@ class MovieItemWidget extends StatefulWidget {
     required this.ratings,
     required this.movieId,
     bool? isRatingVisible,
-  })  : this.poster = poster ??
-            'https://supabase.konexapp.com.br/storage/v1/object/sign/storagesetmovie/capa/Artboard%201.png?token=eyJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzdG9yYWdlc2V0bW92aWUvY2FwYS9BcnRib2FyZCAxLnBuZyIsImlhdCI6MTc1NzM0NTE1MiwiZXhwIjo0OTEwOTQ1MTUyfQ.Qn9q4oTyv0EX7RfLwkmTFA9so-FWO5bdT-AYbx2V_dw',
+  })  : this.poster = poster ?? '',
         this.isRatingVisible = isRatingVisible ?? true;
 
   final String poster;
@@ -94,14 +93,31 @@ class _MovieItemWidgetState extends State<MovieItemWidget> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(16.0),
-                    child: Image.network(
-                      valueOrDefault<String>(
-                        widget.poster,
-                        'https://supabase.konexapp.com.br/storage/v1/object/sign/storagesetmovie/capa/Artboard%201.png?token=eyJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzdG9yYWdlc2V0bW92aWUvY2FwYS9BcnRib2FyZCAxLnBuZyIsImlhdCI6MTc1NzM0NTE1MiwiZXhwIjo0OTEwOTQ1MTUyfQ.Qn9q4oTyv0EX7RfLwkmTFA9so-FWO5bdT-AYbx2V_dw',
-                      ),
-                      width: 154.0,
-                      height: 246.0,
-                      fit: BoxFit.cover,
+                    child: Builder(
+                      builder: (context) {
+                        final poster = widget.poster;
+                        if (poster.isEmpty) {
+                          return Image.asset(
+                            'assets/images/Artboard 1.png',
+                            width: 154.0,
+                            height: 246.0,
+                            fit: BoxFit.cover,
+                          );
+                        }
+                        return Image.network(
+                          poster,
+                          width: 154.0,
+                          height: 246.0,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Image.asset(
+                            'assets/images/Artboard 1.png',
+                            width: 154.0,
+                            height: 246.0,
+                            fit: BoxFit.cover,
+                          ),
+                        );
+                      },
                     ),
                   ),
                   if (widget.isRatingVisible)
@@ -112,25 +128,17 @@ class _MovieItemWidgetState extends State<MovieItemWidget> {
                             0.0, 0.0, 10.0, 14.0),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
-                          child: Image.network(
-                            valueOrDefault<String>(
-                              () {
-                                if (widget.ratings == 1.0) {
-                                  return 'https://supabase.konexapp.com.br/storage/v1/object/public/storagesetmovie/rating/ratting_1.png';
-                                } else if (widget.ratings == 2.0) {
-                                  return 'https://supabase.konexapp.com.br/storage/v1/object/public/storagesetmovie/rating/ratting_2.png';
-                                } else if (widget.ratings == 3.0) {
-                                  return 'https://supabase.konexapp.com.br/storage/v1/object/public/storagesetmovie/rating/ratting_3.png';
-                                } else if (widget.ratings == 4.0) {
-                                  return 'https://supabase.konexapp.com.br/storage/v1/object/public/storagesetmovie/rating/ratting_4.png';
-                                } else {
-                                  return 'https://supabase.konexapp.com.br/storage/v1/object/public/storagesetmovie/rating/ratting_5.png';
-                                }
-                              }(),
-                              'https://supabase.konexapp.com.br/storage/v1/object/public/storagesetmovie/rating/ratting_1.png',
-                            ),
-                            height: 18.0,
-                            fit: BoxFit.contain,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: List.generate(5, (index) {
+                              return Icon(
+                                index < (widget.ratings ?? 0).round()
+                                    ? Icons.star_rounded
+                                    : Icons.star_outline_rounded,
+                                color: Color(0xFFFFC107),
+                                size: 14.0,
+                              );
+                            }),
                           ),
                         ),
                       ),

@@ -98,6 +98,12 @@ class _MovieItem2WidgetState extends State<MovieItem2Widget> {
                 width: double.infinity,
                 height: double.infinity,
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Image.asset(
+                  'assets/images/Artboard 1.png',
+                  width: double.infinity,
+                  height: double.infinity,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
             Padding(
@@ -140,26 +146,17 @@ class _MovieItem2WidgetState extends State<MovieItem2Widget> {
                               0.0, 0.0, 10.0, 14.0),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(8.0),
-                            child: Image.network(
-                              valueOrDefault<String>(
-                                () {
-                                  if (widget.ratings == 1.0) {
-                                    return 'https://supabase.konexapp.com.br/storage/v1/object/public/storagesetmovie/rating/ratting_1.png';
-                                  } else if (widget.ratings == 2.0) {
-                                    return 'https://supabase.konexapp.com.br/storage/v1/object/public/storagesetmovie/rating/ratting_2.png';
-                                  } else if (widget.ratings == 3.0) {
-                                    return 'https://supabase.konexapp.com.br/storage/v1/object/public/storagesetmovie/rating/ratting_3.png';
-                                  } else if (widget.ratings == 4.0) {
-                                    return 'https://supabase.konexapp.com.br/storage/v1/object/public/storagesetmovie/rating/ratting_4.png';
-                                  } else {
-                                    return 'https://supabase.konexapp.com.br/storage/v1/object/public/storagesetmovie/rating/ratting_5.png';
-                                  }
-                                }(),
-                                'https://supabase.konexapp.com.br/storage/v1/object/public/storagesetmovie/rating/ratting_1.png',
-                              ),
-                              width: MediaQuery.sizeOf(context).width * 0.18,
-                              height: MediaQuery.sizeOf(context).height * 0.1,
-                              fit: BoxFit.contain,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: List.generate(5, (index) {
+                                return Icon(
+                                  index < (widget.ratings ?? 0).round()
+                                      ? Icons.star_rounded
+                                      : Icons.star_outline_rounded,
+                                  color: Color(0xFFFFC107),
+                                  size: 14.0,
+                                );
+                              }),
                             ),
                           ),
                         ),

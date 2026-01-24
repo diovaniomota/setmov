@@ -137,3 +137,13 @@ DateTime? addTimeToDate(
       return base;
   }
 }
+String getAvatarPath(
+  String? profileUrl,
+  String? userId,
+) {
+  if (profileUrl != null && profileUrl.isNotEmpty) {
+    return profileUrl;
+  }
+  final index = ((userId?.hashCode ?? 0) % 11).abs() + 1;
+  return 'assets/images/$index.png';
+}

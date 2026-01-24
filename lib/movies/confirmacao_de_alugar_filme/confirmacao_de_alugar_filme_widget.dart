@@ -210,10 +210,12 @@ class _ConfirmacaoDeAlugarFilmeWidgetState
                                     child: SuccessDialogWidget(
                                       title: 'Locação de Filme',
                                       shortDesc: ApisStripeGroup
-                                          .subtrairvalorCall
-                                          .message(
-                                        (_model.subtrairValor?.jsonBody ?? ''),
-                                      )!,
+                                              .subtrairvalorCall
+                                              .message(
+                                            (_model.subtrairValor?.jsonBody ??
+                                                ''),
+                                          ) ??
+                                          'Filme locado com sucesso!',
                                       doneText: 'Fechar',
                                       successIcon: Icon(
                                         Icons.check,
@@ -273,10 +275,12 @@ class _ConfirmacaoDeAlugarFilmeWidgetState
                                     child: SuccessDialogWidget(
                                       title: 'Locação de Filme',
                                       shortDesc: ApisStripeGroup
-                                          .subtrairvalorCall
-                                          .message(
-                                        (_model.subtrairValor?.jsonBody ?? ''),
-                                      )!,
+                                              .subtrairvalorCall
+                                              .message(
+                                            (_model.subtrairValor?.jsonBody ??
+                                                ''),
+                                          ) ??
+                                          'Filme locado com sucesso!',
                                       doneText: 'Fechar',
                                       successIcon: Icon(
                                         Icons.check,
@@ -325,9 +329,13 @@ class _ConfirmacaoDeAlugarFilmeWidgetState
                                   child: SuccessDialogWidget(
                                     title: 'Locação de Filme',
                                     shortDesc: ApisStripeGroup.subtrairvalorCall
-                                        .message(
-                                      (_model.subtrairValor?.jsonBody ?? ''),
-                                    )!,
+                                            .message(
+                                          (_model.subtrairValor?.jsonBody ??
+                                              ''),
+                                        ) ??
+                                        (_model.subtrairValor?.jsonBody
+                                                ?.toString() ??
+                                            'Não foi possível realizar a locação. Verifique sua conexão ou saldo.'),
                                     doneText: 'Fechar',
                                     successIcon: Icon(
                                       Icons.close_sharp,

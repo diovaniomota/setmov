@@ -8,7 +8,6 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/random_data_util.dart' as random_data;
 import '/index.dart';
-import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:webviewx_plus/webviewx_plus.dart';
@@ -192,18 +191,13 @@ class _PaymentSummaryCopyWidgetState extends State<PaymentSummaryCopyWidget> {
                                   child: TextFormField(
                                     controller: _model.textController,
                                     focusNode: _model.textFieldFocusNode,
-                                    onChanged: (_) => EasyDebounce.debounce(
-                                      '_model.textController',
-                                      Duration(milliseconds: 2000),
-                                      () async {
-                                        _model.valor =
-                                            _model.textController.text;
-                                        _model.tax = '1.99';
-                                        _model.valorint = int.tryParse(
-                                            _model.textController.text);
-                                        safeSetState(() {});
-                                      },
-                                    ),
+                                    onChanged: (_) {
+                                      _model.valor = _model.textController.text;
+                                      _model.tax = '1.99';
+                                      _model.valorint = int.tryParse(
+                                          _model.textController.text);
+                                      safeSetState(() {});
+                                    },
                                     autofocus: false,
                                     obscureText: false,
                                     decoration: InputDecoration(
@@ -572,7 +566,7 @@ class _PaymentSummaryCopyWidgetState extends State<PaymentSummaryCopyWidget> {
                       padding: EdgeInsets.all(20.0),
                       child: FFButtonWidget(
                         onPressed: () async {
-                          if (_model.valorint! >= 2) {
+                          if ((_model.valorint ?? 0) >= 2) {
                             _model.walletExiste =
                                 await WalletsTable().queryRows(
                               queryFn: (q) => q.eqOrNull(
@@ -596,29 +590,42 @@ class _PaymentSummaryCopyWidgetState extends State<PaymentSummaryCopyWidget> {
                                 userId: currentUserUid,
                                 coins: _model.valor,
                                 number: _model.numeroAleatorio,
+                                successUrl:
+                                    'setmov://setmov.com/paymentSummaryCopy',
+                                cancelUrl:
+                                    'setmov://setmov.com/paymentSummaryCopy',
                               );
 
                               if ((_model.linkCheckout?.succeeded ?? true)) {
                                 await launchURL(ApisStripeGroup
-                                    .checkoutPagamentoStripeCall
-                                    .linkURL(
-                                  (_model.linkCheckout?.jsonBody ?? ''),
-                                )!);
-                                await Future.delayed(
-                                  Duration(
-                                    milliseconds: 20000,
-                                  ),
-                                );
-                                _model.statusPagamentoWallet =
-                                    await PaymentConfirmationTable().queryRows(
-                                  queryFn: (q) => q.eqOrNull(
-                                    'stripe_payment_intent_id',
-                                    _model.numeroAleatorio,
-                                  ),
-                                );
-                                if (_model.statusPagamentoWallet?.firstOrNull
-                                        ?.status ==
-                                    'succeeded') {
+                                        .checkoutPagamentoStripeCall
+                                        .linkURL(
+                                      (_model.linkCheckout?.jsonBody ?? ''),
+                                    ) ??
+                                    '');
+                                int retryCountWallet = 0;
+                                bool paymentSucceededWallet = false;
+                                while (retryCountWallet < 30 &&
+                                    !paymentSucceededWallet) {
+                                  await Future.delayed(
+                                      Duration(milliseconds: 2000));
+                                  if (!mounted) return;
+                                  _model.statusPagamentoWallet =
+                                      await PaymentConfirmationTable()
+                                          .queryRows(
+                                    queryFn: (q) => q.eqOrNull(
+                                      'stripe_payment_intent_id',
+                                      _model.numeroAleatorio,
+                                    ),
+                                  );
+                                  if (_model.statusPagamentoWallet?.firstOrNull
+                                          ?.status ==
+                                      'succeeded') {
+                                    paymentSucceededWallet = true;
+                                  }
+                                  retryCountWallet++;
+                                }
+                                if (paymentSucceededWallet) {
                                   safeSetState(() {
                                     _model.textController?.clear();
                                   });
@@ -760,30 +767,43 @@ class _PaymentSummaryCopyWidgetState extends State<PaymentSummaryCopyWidget> {
                                 userId: currentUserUid,
                                 coins: _model.valor,
                                 number: _model.numeroAleatorio,
+                                successUrl:
+                                    'setmov://setmov.com/paymentSummaryCopy',
+                                cancelUrl:
+                                    'setmov://setmov.com/paymentSummaryCopy',
                               );
 
                               if ((_model.linkCheckoutWallet?.succeeded ??
                                   true)) {
                                 await launchURL(ApisStripeGroup
-                                    .checkoutPagamentoStripeCall
-                                    .linkURL(
-                                  (_model.linkCheckoutWallet?.jsonBody ?? ''),
-                                )!);
-                                await Future.delayed(
-                                  Duration(
-                                    milliseconds: 20000,
-                                  ),
-                                );
-                                _model.statusPagamento =
-                                    await PaymentConfirmationTable().queryRows(
-                                  queryFn: (q) => q.eqOrNull(
-                                    'stripe_payment_intent_id',
-                                    _model.numeroAleatorio,
-                                  ),
-                                );
-                                if (_model
-                                        .statusPagamento?.firstOrNull?.status ==
-                                    'succeeded') {
+                                        .checkoutPagamentoStripeCall
+                                        .linkURL(
+                                      (_model.linkCheckoutWallet?.jsonBody ??
+                                          ''),
+                                    ) ??
+                                    '');
+                                int retryCount = 0;
+                                bool paymentSucceeded = false;
+                                while (retryCount < 30 && !paymentSucceeded) {
+                                  await Future.delayed(
+                                      Duration(milliseconds: 2000));
+                                  if (!mounted) return;
+                                  _model.statusPagamento =
+                                      await PaymentConfirmationTable()
+                                          .queryRows(
+                                    queryFn: (q) => q.eqOrNull(
+                                      'stripe_payment_intent_id',
+                                      _model.numeroAleatorio,
+                                    ),
+                                  );
+                                  if (_model.statusPagamento?.firstOrNull
+                                          ?.status ==
+                                      'succeeded') {
+                                    paymentSucceeded = true;
+                                  }
+                                  retryCount++;
+                                }
+                                if (paymentSucceeded) {
                                   safeSetState(() {
                                     _model.textController?.clear();
                                   });

@@ -24,47 +24,91 @@ Future<bool> registerUserWithSupabase(
   try {
     debugPrint('Iniciando o registro com o email: $email');
 
-    // 1. Tentar registrar no Supabase Auth
-    final AuthResponse authResponse = await supabase.auth.signUp(
-      email: email,
-      password: password,
-    );
+    String? userId;
 
-    // 2. Verificar o resultado do registro de autenticação
-    if (authResponse.user == null) {
-      debugPrint(
-          'Falha no registro de autenticação: o usuário retornado é nulo.');
-      // Verifique as possíveis razões: email já registrado, senha muito curta.
+    try {
+      // 1. Tentar registrar no Supabase Auth
+      final AuthResponse authResponse = await supabase.auth.signUp(
+        email: email,
+        password: password,
+      );
+      userId = authResponse.user?.id;
+    } on AuthException catch (e) {
+      if (e.message.contains('already registered') ||
+          e.message.contains('already exists')) {
+        debugPrint(
+            'Usuário já registrado no Auth. Tentando login para completar o cadastro...');
+        try {
+          final AuthResponse signInResponse =
+              await supabase.auth.signInWithPassword(
+            email: email,
+            password: password,
+          );
+          userId = signInResponse.user?.id;
+        } catch (signInError) {
+          debugPrint('Falha ao autenticar usuário existente: $signInError');
+          return false;
+        }
+      } else {
+        rethrow;
+      }
+    }
+
+    if (userId == null) {
+      debugPrint('Falha no registro: UID não obtido.');
       return false;
     }
 
-    final String userId = authResponse.user!.id;
-    debugPrint('Usuário autenticado com sucesso. UID: $userId');
+    debugPrint(
+        'Usuário identificado. UID: $userId. Garantindo dados no banco...');
 
-    // 3. Tentar inserir os dados na tabela users
-    debugPrint('Tentando inserir dados na tabela users...');
-    await supabase.from('users').insert({
+    // 2. Tentar inserir ou atualizar os dados na tabela users (upsert)
+    // Garantimos que os nomes não sejam vazios para não quebrar a UI
+    final String cleanFirstName = firstName.trim();
+    final String cleanLastName = (lastName ?? '').trim();
+
+    await supabase.from('users').upsert({
       'id': userId,
-      'first_name': firstName,
-      'last_name': lastName,
+      'first_name': cleanFirstName.isEmpty ? 'Usuário' : cleanFirstName,
+      'last_name': cleanLastName,
       'email': email,
       'phone': phone,
       'age': calcularIdade(dateOfBirth),
-      'date_of_birth': dateOfBirth,
+      'date_of_birth': dateOfBirth.toIso8601String(),
     });
 
-    debugPrint('Dados do usuário persistidos com sucesso na tabela users.');
-    return true; // Sucesso
+    // 3. Inicializar a carteira (wallets) e créditos (user_credits) se não existirem
+    // Usamos upsert aqui baseado no user_id para garantir a criação sem duplicar
+    try {
+      debugPrint('Garantindo inicialização da carteira para $userId...');
+      await supabase.from('wallets').upsert({
+        'user_id': userId,
+        'balance_coins': 0.0,
+      }, onConflict: 'user_id');
+    } catch (e) {
+      debugPrint('Erro ao garantir carteira: $e');
+    }
+
+    try {
+      debugPrint('Garantindo inicialização de créditos para $userId...');
+      await supabase.from('user_credits').upsert({
+        'user_id': userId,
+        'balance': 0.0,
+      }, onConflict: 'user_id');
+    } catch (e) {
+      debugPrint('Erro ao garantir créditos: $e');
+    }
+
+    debugPrint('Fluxo de registro/recuperação concluído com sucesso.');
+    return true;
   } on AuthException catch (e) {
     debugPrint('ERRO de AUTENTICAÇÃO no Supabase: ${e.message}');
-    return false; // Falha na autenticação
+    return false;
   } on PostgrestException catch (e) {
-    // Este erro agora seria de dados, se houver.
-    debugPrint('ERRO DE INSERÇÃO no Supabase (Postgrest): ${e.message}');
-    debugPrint('Código do erro: ${e.code}');
-    return false; // Falha na inserção
+    debugPrint('ERRO DE BANCO no Supabase (Postgrest): ${e.message}');
+    return false;
   } catch (e) {
     debugPrint('ERRO DESCONHECIDO: $e');
-    return false; // Falha geral
+    return false;
   }
 }

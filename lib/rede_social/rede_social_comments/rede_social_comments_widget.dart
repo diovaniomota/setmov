@@ -6,7 +6,7 @@ import '/flutter_flow/flutter_flow_count_controller.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/rede_social/comment_card/comment_card_widget.dart';
-import '/flutter_flow/custom_functions.dart' as functions;
+import '/components/success_dialogsem_action/success_dialogsem_action_widget.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -258,17 +258,7 @@ class _RedeSocialCommentsWidgetState extends State<RedeSocialCommentsWidget> {
                       },
                     ),
                   ),
-                  if ((redeSocialCommentsMovieRentalsRow?.expiresAt != null) &&
-                      (getCurrentTimestamp >
-                          functions.addTimeToDate(
-                              redeSocialCommentsMovieRentalsRow?.expiresAt,
-                              1,
-                              'minutes')!) &&
-                      (getCurrentTimestamp <=
-                          functions.addTimeToDate(
-                              redeSocialCommentsMovieRentalsRow?.expiresAt,
-                              24,
-                              'hours')!))
+                  if (currentUserUid != '')
                     Align(
                       alignment: AlignmentDirectional(0.0, 1.0),
                       child: FutureBuilder<List<MovieCommentsRow>>(
@@ -301,12 +291,8 @@ class _RedeSocialCommentsWidgetState extends State<RedeSocialCommentsWidget> {
                           List<MovieCommentsRow> containerMovieCommentsRowList =
                               snapshot.data!;
 
-                          final containerMovieCommentsRow =
-                              containerMovieCommentsRowList.isNotEmpty
-                                  ? containerMovieCommentsRowList.first
-                                  : null;
-
                           return Container(
+                            width: double.infinity,
                             decoration: BoxDecoration(
                               color: FlutterFlowTheme.of(context)
                                   .primaryBackground,
@@ -322,7 +308,7 @@ class _RedeSocialCommentsWidgetState extends State<RedeSocialCommentsWidget> {
                               ),
                             ),
                             child: Padding(
-                              padding: EdgeInsets.all(20.0),
+                              padding: EdgeInsets.all(12.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
@@ -491,8 +477,8 @@ class _RedeSocialCommentsWidgetState extends State<RedeSocialCommentsWidget> {
                                     ),
                                   ),
                                   Container(
-                                    width: 50.0,
-                                    height: 40.0,
+                                    width: 60.0,
+                                    height: 45.0,
                                     decoration: BoxDecoration(
                                       color: FlutterFlowTheme.of(context)
                                           .secondaryBackground,
@@ -561,6 +547,112 @@ class _RedeSocialCommentsWidgetState extends State<RedeSocialCommentsWidget> {
                                     hoverColor: Colors.transparent,
                                     highlightColor: Colors.transparent,
                                     onTap: () async {
+                                      if (redeSocialCommentsMovieRentalsRow ==
+                                          null) {
+                                        await showDialog(
+                                          context: context,
+                                          builder: (dialogContext) {
+                                            return Dialog(
+                                              elevation: 0,
+                                              insetPadding: EdgeInsets.zero,
+                                              backgroundColor:
+                                                  Colors.transparent,
+                                              alignment:
+                                                  AlignmentDirectional(0.0, 0.0)
+                                                      .resolve(
+                                                          Directionality.of(
+                                                              context)),
+                                              child: GestureDetector(
+                                                onTap: () {
+                                                  FocusScope.of(dialogContext)
+                                                      .unfocus();
+                                                  FocusManager
+                                                      .instance.primaryFocus
+                                                      ?.unfocus();
+                                                },
+                                                child:
+                                                    SuccessDialogsemActionWidget(
+                                                  title: 'Atenção',
+                                                  shortDesc:
+                                                      'É permitido comentar somente se alugar o filme.',
+                                                  doneText: 'Entendi',
+                                                  successIcon: Icon(
+                                                    Icons.lock_outline_rounded,
+                                                    color: Colors.white,
+                                                    size: 30.0,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        );
+                                        return;
+                                      }
+
+                                      final movieHistoryList =
+                                          await MovieHistoryTable()
+                                              .querySingleRow(
+                                        queryFn: (q) => q
+                                            .eq('user_id', currentUserUid)
+                                            .eqOrNull(
+                                                'movie_id', widget.movieId),
+                                      );
+
+                                      bool hasWatchedEnough = false;
+                                      if (movieHistoryList.isNotEmpty) {
+                                        final history = movieHistoryList.first;
+                                        final watched =
+                                            history.watchedDuration ?? 0;
+                                        final total =
+                                            history.totalDuration ?? 1;
+                                        if (total > 0 &&
+                                            (watched / total) >= 0.7) {
+                                          hasWatchedEnough = true;
+                                        }
+                                      }
+
+                                      if (!hasWatchedEnough) {
+                                        await showDialog(
+                                          context: context,
+                                          builder: (dialogContext) {
+                                            return Dialog(
+                                              elevation: 0,
+                                              insetPadding: EdgeInsets.zero,
+                                              backgroundColor:
+                                                  Colors.transparent,
+                                              alignment:
+                                                  AlignmentDirectional(0.0, 0.0)
+                                                      .resolve(
+                                                          Directionality.of(
+                                                              context)),
+                                              child: GestureDetector(
+                                                onTap: () {
+                                                  FocusScope.of(dialogContext)
+                                                      .unfocus();
+                                                  FocusManager
+                                                      .instance.primaryFocus
+                                                      ?.unfocus();
+                                                },
+                                                child:
+                                                    SuccessDialogsemActionWidget(
+                                                  title: 'Atenção',
+                                                  shortDesc:
+                                                      'Você precisa assistir a pelo menos 70% do filme para comentar.',
+                                                  doneText: 'Entendi',
+                                                  successIcon: Icon(
+                                                    Icons
+                                                        .play_circle_outline_rounded,
+                                                    color: Colors.white,
+                                                    size: 30.0,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        );
+                                        return;
+                                      }
+
                                       await MovieCommentsTable().insert({
                                         'user_id': currentUserUid,
                                         'movie_id': widget.movieId,
@@ -568,6 +660,9 @@ class _RedeSocialCommentsWidgetState extends State<RedeSocialCommentsWidget> {
                                             .tFComentarioTextController.text,
                                         'created_at': supaSerialize<DateTime>(
                                             getCurrentTimestamp),
+                                        'rental_id':
+                                            redeSocialCommentsMovieRentalsRow
+                                                .id,
                                       });
                                       safeSetState(() =>
                                           _model.requestCompleter1 = null);
@@ -604,7 +699,7 @@ class _RedeSocialCommentsWidgetState extends State<RedeSocialCommentsWidget> {
                                       ),
                                     ),
                                   ),
-                                ].divide(SizedBox(width: 12.0)),
+                                ].divide(SizedBox(width: 8.0)),
                               ),
                             ),
                           );

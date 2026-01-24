@@ -6,6 +6,7 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_web_view.dart';
+import '/flutter_flow/flutter_flow_video_player.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/instant_timer.dart';
 import '/flutter_flow/custom_functions.dart' as functions;
@@ -43,6 +44,7 @@ class MoviePlayWidget extends StatefulWidget {
 
 class _MoviePlayWidgetState extends State<MoviePlayWidget> {
   late MoviePlayModel _model;
+  int _lastUpdatedSecond = -1;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -158,7 +160,7 @@ class _MoviePlayWidgetState extends State<MoviePlayWidget> {
                           child: Image.network(
                             valueOrDefault<String>(
                               moviePlayMoviesRow?.coverUrl,
-                              'https://supabase.konexapp.com.br/storage/v1/object/sign/storagesetmovie/capa/Artboard%201.png?token=eyJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzdG9yYWdlc2V0bW92aWUvY2FwYS9BcnRib2FyZCAxLnBuZyIsImlhdCI6MTc1NzM0NTE1MiwiZXhwIjo0OTEwOTQ1MTUyfQ.Qn9q4oTyv0EX7RfLwkmTFA9so-FWO5bdT-AYbx2V_dw',
+                              'https://hwkkrylnqyoerpaiujfq.supabase.co/storage/v1/object/public/storagesetmovie/capa/Artboard%201.png',
                             ),
                             width: double.infinity,
                             height: double.infinity,
@@ -223,7 +225,7 @@ class _MoviePlayWidgetState extends State<MoviePlayWidget> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'TEMPO: ${functions.diffFromRented(_model.movieRental!.expiresAt)}',
+                              'TEMPO: ${_model.movieRental?.expiresAt != null ? functions.diffFromRented(_model.movieRental!.expiresAt) : 'Calculando...'}',
                               style: FlutterFlowTheme.of(context)
                                   .bodyMedium
                                   .override(
@@ -269,17 +271,76 @@ class _MoviePlayWidgetState extends State<MoviePlayWidget> {
                             ),
                             Align(
                               alignment: AlignmentDirectional(0.0, 0.0),
-                              child: FlutterFlowWebView(
-                                content: valueOrDefault<String>(
-                                  moviePlayMoviesRow?.streamUrl,
-                                  'Não há',
-                                ),
-                                width: MediaQuery.sizeOf(context).width * 1.0,
-                                height: MediaQuery.sizeOf(context).height * 1.0,
-                                verticalScroll: true,
-                                horizontalScroll: true,
-                                html: true,
-                              ),
+                              child: Builder(builder: (context) {
+                                final streamUrl =
+                                    moviePlayMoviesRow?.streamUrl ?? '';
+                                final isHtml = streamUrl.trim().startsWith('<');
+                                final isDirectLink = streamUrl
+                                        .toLowerCase()
+                                        .contains('.mp4') ||
+                                    streamUrl.toLowerCase().contains('.mov') ||
+                                    streamUrl.contains('supabase.co');
+
+                                if (streamUrl == 'Não há' ||
+                                    streamUrl.isEmpty) {
+                                  return Text(
+                                    'Link indisponível',
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          font: GoogleFonts.roboto(),
+                                          color:
+                                              FlutterFlowTheme.of(context).info,
+                                        ),
+                                  );
+                                }
+
+                                if (isHtml) {
+                                  return FlutterFlowWebView(
+                                    content: streamUrl,
+                                    width:
+                                        MediaQuery.sizeOf(context).width * 1.0,
+                                    height:
+                                        MediaQuery.sizeOf(context).height * 0.4,
+                                    verticalScroll: true,
+                                    horizontalScroll: true,
+                                    html: true,
+                                  );
+                                }
+
+                                if (isDirectLink) {
+                                  return FlutterFlowVideoPlayer(
+                                    path: Uri.encodeFull(streamUrl),
+                                    videoType: VideoType.network,
+                                    width:
+                                        MediaQuery.sizeOf(context).width * 1.0,
+                                    height:
+                                        MediaQuery.sizeOf(context).height * 0.4,
+                                    autoPlay: true,
+                                    looping: false,
+                                    showControls: true,
+                                    allowFullScreen: true,
+                                    allowPlaybackSpeedMenu: false,
+                                    lazyLoad: false,
+                                    onVideoProgress: (position, duration) {
+                                      if (position.inSeconds % 10 == 0) {
+                                        _updateWatchHistory(position, duration);
+                                      }
+                                    },
+                                  );
+                                }
+
+                                // Default to WebView for other links
+                                return FlutterFlowWebView(
+                                  content: streamUrl,
+                                  width: MediaQuery.sizeOf(context).width * 1.0,
+                                  height:
+                                      MediaQuery.sizeOf(context).height * 0.4,
+                                  verticalScroll: true,
+                                  horizontalScroll: true,
+                                  html: false,
+                                );
+                              }),
                             ),
                             ClipRRect(
                               borderRadius: BorderRadius.circular(20.0),
@@ -467,13 +528,8 @@ class _MoviePlayWidgetState extends State<MoviePlayWidget> {
                                             safeSetState(() {});
                                           return;
                                         } else {
-                                          if (_shouldSetState)
-                                            safeSetState(() {});
                                           return;
                                         }
-
-                                        if (_shouldSetState)
-                                          safeSetState(() {});
                                       },
                                       text: 'Estender locação',
                                       icon: Icon(
@@ -634,5 +690,36 @@ class _MoviePlayWidgetState extends State<MoviePlayWidget> {
         );
       },
     );
+  }
+
+  Future<void> _updateWatchHistory(Duration position, Duration duration) async {
+    // Evitar updates frequentes
+    if (_lastUpdatedSecond == position.inSeconds) return;
+    _lastUpdatedSecond = position.inSeconds;
+
+    // Verificar se já existe registro
+    final existing = await MovieHistoryTable().querySingleRow(
+      queryFn: (q) =>
+          q.eq('user_id', currentUserUid).eqOrNull('movie_id', widget.movieId),
+    );
+
+    if (existing.isNotEmpty) {
+      await MovieHistoryTable().update(
+        data: {
+          'watched_duration': position.inSeconds,
+          'total_duration': duration.inSeconds,
+          'watched_at': supaSerialize<DateTime>(getCurrentTimestamp),
+        },
+        matchingRows: (rows) => rows.eq('id', existing.first.id),
+      );
+    } else {
+      await MovieHistoryTable().insert({
+        'user_id': currentUserUid,
+        'movie_id': widget.movieId,
+        'watched_duration': position.inSeconds,
+        'total_duration': duration.inSeconds,
+        'watched_at': supaSerialize<DateTime>(getCurrentTimestamp),
+      });
+    }
   }
 }

@@ -30,9 +30,11 @@ Para o Codemagic criar certificados e assinar o app automaticamente, ele precisa
 
 ## Passo 4: Configurar no Codemagic
 
-1.  No painel do Codemagic, vá nas configurações do seu App.
-2.  Vá na aba **Environment variables**? Não, vá direto em **Teams > Personal Account > Integrations > App Store Connect**.
-3.  Adicione uma nova chave:
+1.  No painel do Codemagic, olhe no menu lateral esquerdo e clique em **Teams**.
+2.  Vai aparecer uma lista (provavelmente só com "diovaniomota's Team" ou "Personal Account"). Clique **em cima do nome** desse time.
+3.  Agora vai abrir uma nova tela de configurações do time. Procure uma aba chamada **Team integrations** (ou **Integrations**).
+4.  Clique em **App Store Connect**.
+5.  Adicione uma nova chave (ou verifique o nome da existente):
     *   **Key ID**: `32538K79K2`
     *   **Issuer ID**: (O ID que aparece na tabela do App Store Connect)
     *   **Private Key**:
@@ -49,13 +51,17 @@ Precisamos criar um grupo chamado `app_store_connect` (exatamente como está no 
 Na verdade, se você conectou a integração no passo 4, o Codemagic já sabe usar.
 *   Apenas certifique-se de que na aba **Distribution > iOS App Store**, a chave que você criou está selecionada.
 
+
 ## Passo 6: Rodar o Build
 
-1.  Clique em **Start new build**.
-2.  Escolha o workflow `iOS Build & Release` (que está no arquivo `codemagic.yaml`).
-3.  Se tudo der certo, o Codemagic vai:
-    *   Criar o certificado e o Profile na sua conta da Apple automaticamente.
-    *   Gerar o `.ipa`.
-    *   Enviar para o TestFlight.
+Agora que o erro de configuração sumiu (pois enviamos a correção):
 
-> **Nota**: O Bundle ID configurado no projeto é `com.migambi.netflex`. Certifique-se de que esse App ID já existe na sua conta da Apple Developer ou que a chave de API tem permissão para criar novos App IDs.
+1.  **Recarregue a página** do Codemagic para garantir que ele pegou a versão nova.
+2.  Clique no botão azul **"Start new build"** (ou "Start your first build") que fica no topo à direita.
+3.  Vai abrir uma janelinha.
+4.  Em **Workflow**, selecione **"iOS Build & Release"**.
+5.  Em **Branch**, deixe **"master"**.
+6.  Clique em **Start new build**.
+
+O Codemagic vai alugar um Mac mini, instalar tudo, gerar as chaves na Apple e compilar seu app. Pode demorar uns 15-30 minutos.
+Fique de olho nos logs (texto preto passando na tela). Se der tudo verde no final, seu app vai aparecer no **TestFlight** da Apple em breve!

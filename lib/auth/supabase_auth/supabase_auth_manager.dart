@@ -33,7 +33,7 @@ class SupabaseAuthManager extends AuthManager with EmailSignInManager {
   }
 
   @override
-  Future updateEmail({
+  Future<void> updateEmail({
     required String email,
     required BuildContext context,
   }) async {

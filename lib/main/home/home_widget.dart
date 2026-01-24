@@ -1,12 +1,12 @@
 import '/auth/supabase_auth/auth_util.dart';
 import '/backend/supabase/supabase.dart';
-import '/components/genre_item/genre_item_widget.dart';
 import '/components/interest_item/interest_item_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/main/header/header_widget.dart';
 import '/main/navbar/navbar_widget.dart';
 import '/movies/movie_item/movie_item_widget.dart';
+import '/flutter_flow/custom_functions.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -177,13 +177,28 @@ class _HomeWidgetState extends State<HomeWidget> {
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
                                           ),
-                                          child: Image.network(
-                                            valueOrDefault<String>(
-                                              listViewViewUserFollowingWithAvatarRow
-                                                  .imagemPerfil,
-                                              'https://supabase.konexapp.com.br/storage/v1/object/sign/storagesetmovie/avatar/4.png?token=eyJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzdG9yYWdlc2V0bW92aWUvYXZhdGFyLzQucG5nIiwiaWF0IjoxNzU4NzEzNjEzLCJleHAiOjQ5MTIzMTM2MTN9.J54Igz3BhBOWpLp8dMZXuuD2EiVFI_8VIz3s3r9ubBI',
-                                            ),
-                                            fit: BoxFit.fitWidth,
+                                          child: Builder(
+                                            builder: (context) {
+                                              return Image.network(
+                                                getAvatarPath(
+                                                  listViewViewUserFollowingWithAvatarRow
+                                                      .imagemPerfil,
+                                                  listViewViewUserFollowingWithAvatarRow
+                                                      .followedId,
+                                                ),
+                                                fit: BoxFit.fitWidth,
+                                                errorBuilder: (context, error,
+                                                        stackTrace) =>
+                                                    Image.asset(
+                                                  getAvatarPath(
+                                                    null,
+                                                    listViewViewUserFollowingWithAvatarRow
+                                                        .followedId,
+                                                  ),
+                                                  fit: BoxFit.fitWidth,
+                                                ),
+                                              );
+                                            },
                                           ),
                                         ),
                                       );
@@ -632,129 +647,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                                 ),
                               ].divide(SizedBox(height: 20.0)),
                             ),
-                            Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  15.0, 0.0, 15.0, 0.0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Categorias',
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          font: GoogleFonts.roboto(
-                                            fontWeight: FontWeight.normal,
-                                            fontStyle: FontStyle.italic,
-                                          ),
-                                          fontSize: 18.0,
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.normal,
-                                          fontStyle: FontStyle.italic,
-                                        ),
-                                  ),
-                                  InkWell(
-                                    splashColor: Colors.transparent,
-                                    focusColor: Colors.transparent,
-                                    hoverColor: Colors.transparent,
-                                    highlightColor: Colors.transparent,
-                                    onTap: () async {
-                                      context.pushNamed(GenresWidget.routeName);
-                                    },
-                                    child: Text(
-                                      'Ver todos',
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            font: GoogleFonts.roboto(
-                                              fontWeight: FontWeight.w500,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
-                                            ),
-                                            color: FlutterFlowTheme.of(context)
-                                                .primaryText,
-                                            fontSize: 15.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.w500,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                          ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  wrapWithModel(
-                                    model: _model.genreItemModel1,
-                                    updateCallback: () => safeSetState(() {}),
-                                    child: GenreItemWidget(
-                                      poster:
-                                          'https://cdn.shopify.com/s/files/1/0057/3728/3618/files/sonic-the-hedgehog-3_ncwdwcum_500x749.jpg?v=1725465425',
-                                      title: 'Ação',
-                                    ),
-                                  ),
-                                  wrapWithModel(
-                                    model: _model.genreItemModel2,
-                                    updateCallback: () => safeSetState(() {}),
-                                    child: GenreItemWidget(
-                                      poster:
-                                          'https://cdn.shopify.com/s/files/1/0057/3728/3618/files/moana-2_4vhcigpq_500x749.jpg?v=1725481152',
-                                      title: 'Aventura',
-                                    ),
-                                  ),
-                                  wrapWithModel(
-                                    model: _model.genreItemModel3,
-                                    updateCallback: () => safeSetState(() {}),
-                                    child: GenreItemWidget(
-                                      poster:
-                                          'https://cdn.shopify.com/s/files/1/0057/3728/3618/files/barbie_pztootty_5000b821-5de0-408c-9d7e-d728715e5c76_500x749.jpg?v=1715184383',
-                                      title: 'Comedia',
-                                    ),
-                                  ),
-                                  wrapWithModel(
-                                    model: _model.genreItemModel4,
-                                    updateCallback: () => safeSetState(() {}),
-                                    child: GenreItemWidget(
-                                      poster:
-                                          'https://cdn.shopify.com/s/files/1/0057/3728/3618/files/longlegs_ver7_500x749.jpg?v=1717015553',
-                                      title: 'Drama',
-                                    ),
-                                  ),
-                                  wrapWithModel(
-                                    model: _model.genreItemModel5,
-                                    updateCallback: () => safeSetState(() {}),
-                                    child: GenreItemWidget(
-                                      poster:
-                                          'https://cdn.shopify.com/s/files/1/0057/3728/3618/products/518881014ac2d0daf65131b96696ac45_e72836c5-7a5d-4b0a-afb3-c893aa26b193_500x749.jpg?v=1573615894',
-                                      title: 'Western',
-                                    ),
-                                  ),
-                                  wrapWithModel(
-                                    model: _model.genreItemModel6,
-                                    updateCallback: () => safeSetState(() {}),
-                                    child: GenreItemWidget(
-                                      poster:
-                                          'https://cdn.shopify.com/s/files/1/0057/3728/3618/files/wicked_50e86b10-21d9-469d-907d-fbd45bf3d8c3_500x749.jpg?v=1722004441',
-                                      title: 'Mystry',
-                                    ),
-                                  ),
-                                ]
-                                    .divide(SizedBox(width: 12.0))
-                                    .addToStart(SizedBox(width: 12.0))
-                                    .addToEnd(SizedBox(width: 12.0)),
-                              ),
-                            ),
+
                           ]
                               .divide(SizedBox(height: 20.0))
                               .addToEnd(SizedBox(height: 24.0)),

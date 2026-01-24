@@ -8,6 +8,10 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/index.dart';
+import '/backend/supabase/supabase.dart';
+import '/backend/supabase/storage/storage.dart';
+import '/flutter_flow/upload_data.dart';
+import '/auth/supabase_auth/auth_util.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:webviewx_plus/webviewx_plus.dart';
@@ -50,6 +54,30 @@ class _ProfileSetUpWidgetState extends State<ProfileSetUpWidget> {
     _model.textFieldFocusNode5 ??= FocusNode();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final rows = await UsersTable().querySingleRow(
+        queryFn: (q) => q.eqOrNull('id', currentUserUid),
+      );
+      if (rows.isNotEmpty) {
+        final user = rows.first;
+        safeSetState(() {
+          _model.textController1?.text = user.firstName ?? '';
+          _model.textController2?.text = user.lastName ?? '';
+          _model.textController3?.text = user.dateOfBirthText ?? '';
+          _model.textController4?.text = user.email;
+          _model.textController5?.text = user.phone ?? '';
+          if (user.imagemPerfil != null && user.imagemPerfil!.isNotEmpty) {
+            _model.uploadedFileUrl = user.imagemPerfil!;
+          }
+        });
+      }
+    } catch (e) {
+      print('Erro ao carregar dados do usuário: $e');
+    }
   }
 
   @override
@@ -381,7 +409,9 @@ class _ProfileSetUpWidgetState extends State<ProfileSetUpWidget> {
                                             shape: BoxShape.circle,
                                           ),
                                           child: Image.network(
-                                            'https://images.unsplash.com/photo-1532074205216-d0e1f4b87368?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHw3fHxwcm9maWxlfGVufDB8fHx8MTczMTY0MTY3OXww&ixlib=rb-4.0.3&q=80&w=1080',
+                                            _model.uploadedFileUrl != ''
+                                                ? _model.uploadedFileUrl
+                                                : 'https://images.unsplash.com/photo-1532074205216-d0e1f4b87368?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHw3fHxwcm9maWxlfGVufDB8fHx8MTczMTY0MTY3OXww&ixlib=rb-4.0.3&q=80&w=1080',
                                             fit: BoxFit.cover,
                                           ),
                                         ),
@@ -402,8 +432,80 @@ class _ProfileSetUpWidgetState extends State<ProfileSetUpWidget> {
                                                       .info,
                                               size: 20.0,
                                             ),
-                                            onPressed: () {
-                                              print('IconButton pressed ...');
+                                            onPressed: () async {
+                                              final selectedMedia =
+                                                  await selectMediaWithSourceBottomSheet(
+                                                context: context,
+                                                allowPhoto: true,
+                                                pickerFontFamily: 'Roboto',
+                                              );
+                                              if (selectedMedia != null &&
+                                                  selectedMedia.isNotEmpty) {
+                                                safeSetState(() => _model
+                                                    .isDataUploading = true);
+                                                var selectedUploadedFiles =
+                                                    <FFUploadedFile>[];
+                                                var downloadUrls = <String>[];
+                                                try {
+                                                  showUploadMessage(
+                                                    context,
+                                                    'Uploading file...',
+                                                    showLoading: true,
+                                                  );
+                                                  selectedUploadedFiles =
+                                                      selectedMedia
+                                                          .map((m) =>
+                                                              FFUploadedFile(
+                                                                name: m
+                                                                    .storagePath
+                                                                    .split('/')
+                                                                    .last,
+                                                                bytes: m.bytes,
+                                                                height: m
+                                                                    .dimensions
+                                                                    ?.height,
+                                                                width: m
+                                                                    .dimensions
+                                                                    ?.width,
+                                                                blurHash:
+                                                                    m.blurHash,
+                                                              ))
+                                                          .toList();
+
+                                                  downloadUrls =
+                                                      await uploadSupabaseStorageFiles(
+                                                    bucketName:
+                                                        'storagesetmovie',
+                                                    selectedFiles:
+                                                        selectedMedia,
+                                                  );
+                                                } finally {
+                                                  ScaffoldMessenger.of(context)
+                                                      .hideCurrentSnackBar();
+                                                  _model.isDataUploading =
+                                                      false;
+                                                }
+                                                if (selectedUploadedFiles
+                                                            .length ==
+                                                        selectedMedia.length &&
+                                                    downloadUrls.length ==
+                                                        selectedMedia.length) {
+                                                  safeSetState(() {
+                                                    _model.uploadedLocalFile =
+                                                        selectedUploadedFiles
+                                                            .first;
+                                                    _model.uploadedFileUrl =
+                                                        downloadUrls.first;
+                                                  });
+                                                  showUploadMessage(
+                                                      context, 'Success!');
+                                                } else {
+                                                  safeSetState(() {});
+                                                  showUploadMessage(context,
+                                                      'Failed to upload data');
+                                                  return;
+                                                }
+                                              }
                                             },
                                           ),
                                         ),
@@ -1291,6 +1393,28 @@ class _ProfileSetUpWidgetState extends State<ProfileSetUpWidget> {
                           return Builder(
                             builder: (context) => FFButtonWidget(
                               onPressed: () async {
+                                final Map<String, dynamic> updateData = {
+                                  'first_name': _model.textController1.text,
+                                  'last_name': _model.textController2.text,
+                                  'date_of_birth_text':
+                                      _model.textController3.text,
+                                  'email': _model.textController4.text,
+                                  'phone': _model.textController5.text,
+                                };
+
+                                if (_model.uploadedFileUrl.isNotEmpty) {
+                                  updateData['imagem_perfil'] =
+                                      _model.uploadedFileUrl;
+                                }
+
+                                await UsersTable().update(
+                                  data: updateData,
+                                  matchingRows: (rows) => rows.eqOrNull(
+                                    'id',
+                                    currentUserUid,
+                                  ),
+                                );
+
                                 await showDialog(
                                   context: context,
                                   builder: (dialogContext) {

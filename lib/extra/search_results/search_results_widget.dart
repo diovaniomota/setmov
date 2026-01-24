@@ -88,10 +88,35 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                               child: TextFormField(
                                 controller: _model.textController,
                                 focusNode: _model.textFieldFocusNode,
+                                onFieldSubmitted: (_) async {
+                                  if (_model.textController.text.isEmpty) {
+                                    safeSetState(() {
+                                      _model.buscarAtivo = false;
+                                    });
+                                    return;
+                                  }
+                                  _model.api =
+                                      await MoviesSearchVTable().queryRows(
+                                    queryFn: (q) => q.ilike(
+                                      'title',
+                                      '%${_model.textController.text}%',
+                                    ),
+                                  );
+                                  _model.searchText =
+                                      _model.textController.text;
+                                  _model.buscarAtivo = true;
+                                  safeSetState(() {});
+                                },
                                 onChanged: (_) => EasyDebounce.debounce(
                                   '_model.textController',
-                                  Duration(milliseconds: 2000),
+                                  Duration(milliseconds: 400),
                                   () async {
+                                    if (_model.textController.text.isEmpty) {
+                                      safeSetState(() {
+                                        _model.buscarAtivo = false;
+                                      });
+                                      return;
+                                    }
                                     _model.api =
                                         await MoviesSearchVTable().queryRows(
                                       queryFn: (q) => q.ilike(
@@ -101,15 +126,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                                     );
                                     _model.searchText =
                                         _model.textController.text;
-                                    safeSetState(() {});
                                     _model.buscarAtivo = true;
-                                    safeSetState(() {});
-                                    await Future.delayed(
-                                      Duration(
-                                        milliseconds: 300,
-                                      ),
-                                    );
-
                                     safeSetState(() {});
                                   },
                                 ),

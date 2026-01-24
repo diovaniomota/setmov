@@ -5,6 +5,7 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/upload_data.dart';
+import '/flutter_flow/custom_functions.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -199,12 +200,25 @@ class _PerfilWidgetState extends State<PerfilWidget> {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                               ),
-                              child: Image.network(
-                                valueOrDefault<String>(
-                                  perfilUsersRow?.imagemPerfil,
-                                  'https://supabase.konexapp.com.br/storage/v1/object/sign/storagesetmovie/avatar/4.png?token=eyJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzdG9yYWdlc2V0bW92aWUvYXZhdGFyLzQucG5nIiwiaWF0IjoxNzU4NzEzNjEzLCJleHAiOjQ5MTIzMTM2MTN9.J54Igz3BhBOWpLp8dMZXuuD2EiVFI_8VIz3s3r9ubBI',
-                                ),
-                                fit: BoxFit.cover,
+                              child: Builder(
+                                builder: (context) {
+                                  return Image.network(
+                                    getAvatarPath(
+                                      perfilUsersRow?.imagemPerfil,
+                                      currentUserUid,
+                                    ),
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            Image.asset(
+                                      getAvatarPath(
+                                        null,
+                                        currentUserUid,
+                                      ),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                           ),
@@ -296,23 +310,19 @@ class _PerfilWidgetState extends State<PerfilWidget> {
                                   shape: BoxShape.circle,
                                 ),
                                 child: Image.network(
-                                  valueOrDefault<String>(
-                                    () {
-                                      if (perfilUsersRow?.imagemPerfil !=
-                                              null &&
-                                          perfilUsersRow?.imagemPerfil != '') {
-                                        return perfilUsersRow?.imagemPerfil;
-                                      } else if (_model.uploadedFileUrl_atualizarFotosperfil !=
-                                              '') {
-                                        return _model
-                                            .uploadedFileUrl_atualizarFotosperfil;
-                                      } else {
-                                        return 'https://supabase.konexapp.com.br/storage/v1/object/sign/storagesetmovie/avatar/4.png?token=eyJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzdG9yYWdlc2V0bW92aWUvYXZhdGFyLzQucG5nIiwiaWF0IjoxNzU4NzEzNjEzLCJleHAiOjQ5MTIzMTM2MTN9.J54Igz3BhBOWpLp8dMZXuuD2EiVFI_8VIz3s3r9ubBI';
-                                      }
-                                    }(),
-                                    'https://supabase.konexapp.com.br/storage/v1/object/sign/storagesetmovie/avatar/4.png?token=eyJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzdG9yYWdlc2V0bW92aWUvYXZhdGFyLzQucG5nIiwiaWF0IjoxNzU4NzEzNjEzLCJleHAiOjQ5MTIzMTM2MTN9.J54Igz3BhBOWpLp8dMZXuuD2EiVFI_8VIz3s3r9ubBI',
+                                  getAvatarPath(
+                                    perfilUsersRow?.imagemPerfil,
+                                    currentUserUid,
                                   ),
                                   fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Image.asset(
+                                    getAvatarPath(
+                                      null,
+                                      currentUserUid,
+                                    ),
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
                             ),

@@ -32,6 +32,7 @@ class FlutterFlowVideoPlayer extends StatefulWidget {
     this.allowPlaybackSpeedMenu = false,
     this.lazyLoad = false,
     this.pauseOnNavigate = true,
+    this.onVideoProgress,
   });
 
   final String path;
@@ -46,6 +47,7 @@ class FlutterFlowVideoPlayer extends StatefulWidget {
   final bool allowPlaybackSpeedMenu;
   final bool lazyLoad;
   final bool pauseOnNavigate;
+  final Function(Duration position, Duration duration)? onVideoProgress;
 
   @override
   State<StatefulWidget> createState() => _FlutterFlowVideoPlayerState();
@@ -154,6 +156,11 @@ class _FlutterFlowVideoPlayerState extends State<FlutterFlowVideoPlayer>
             'Error playing video: ${_videoPlayerController!.value.errorDescription}');
         _loggedError = true;
       }
+      
+      if (widget.onVideoProgress != null && _videoPlayerController!.value.isInitialized) {
+        widget.onVideoProgress!(_videoPlayerController!.value.position, _videoPlayerController!.value.duration);
+      }
+
       // Stop all other players when one video is playing.
       if (_videoPlayerController!.value.isPlaying) {
         _videoPlayers.forEach((otherPlayer) {

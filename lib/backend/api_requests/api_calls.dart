@@ -62,6 +62,8 @@ class CheckoutPagamentoStripeCall {
     String? userId = '',
     String? coins = '',
     String? number = '',
+    String? successUrl = '',
+    String? cancelUrl = '',
   }) async {
     final baseUrl = ApisStripeGroup.getBaseUrl();
 
@@ -69,7 +71,9 @@ class CheckoutPagamentoStripeCall {
 {
   "user_id": "${escapeStringForJson(userId)}",
   "coins": "${escapeStringForJson(coins)}",
-  "number": "${escapeStringForJson(number)}"
+  "number": "${escapeStringForJson(number)}",
+  "success_url": "${escapeStringForJson(successUrl)}",
+  "cancel_url": "${escapeStringForJson(cancelUrl)}"
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'checkoutPagamentoStripe',
@@ -167,7 +171,8 @@ class SearchMoviesCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'searchMovies',
-      apiUrl: 'https://supabase.konexapp.com.br/rest/v1/rpc/search_movies',
+      apiUrl:
+          'https://hwkkrylnqyoerpaiujfq.supabase.co/rest/v1/rpc/search_movies',
       callType: ApiCallType.POST,
       headers: {
         'Authorization': 'Bearer ${bearerAuth}',
@@ -222,30 +227,6 @@ class ApiPagingParams {
 
 String _toEncodable(dynamic item) {
   return item;
-}
-
-String _serializeList(List? list) {
-  list ??= <String>[];
-  try {
-    return json.encode(list, toEncodable: _toEncodable);
-  } catch (_) {
-    if (kDebugMode) {
-      print("List serialization failed. Returning empty list.");
-    }
-    return '[]';
-  }
-}
-
-String _serializeJson(dynamic jsonVar, [bool isList = false]) {
-  jsonVar ??= (isList ? [] : {});
-  try {
-    return json.encode(jsonVar, toEncodable: _toEncodable);
-  } catch (_) {
-    if (kDebugMode) {
-      print("Json serialization failed. Returning empty json.");
-    }
-    return isList ? '[]' : '{}';
-  }
 }
 
 String? escapeStringForJson(String? input) {

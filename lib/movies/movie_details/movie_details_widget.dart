@@ -123,15 +123,37 @@ class _MovieDetailsWidgetState extends State<MovieDetailsWidget> {
                                   alignment: AlignmentDirectional(0.0, 0.0),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(0.0),
-                                    child: Image.network(
-                                      valueOrDefault<String>(
-                                        movieDetailsMoviesRow?.coverUrl,
-                                        'https://supabase.konexapp.com.br/storage/v1/object/sign/storagesetmovie/capa/Artboard%201.png?token=eyJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzdG9yYWdlc2V0bW92aWUvY2FwYS9BcnRib2FyZCAxLnBuZyIsImlhdCI6MTc1NzM0NTE1MiwiZXhwIjo0OTEwOTQ1MTUyfQ.Qn9q4oTyv0EX7RfLwkmTFA9so-FWO5bdT-AYbx2V_dw',
-                                      ),
-                                      width: double.infinity,
-                                      height: double.infinity,
-                                      fit: BoxFit.cover,
-                                      alignment: Alignment(0.0, 0.0),
+                                    child: Builder(
+                                      builder: (context) {
+                                        final coverUrl =
+                                            movieDetailsMoviesRow?.coverUrl;
+                                        if (coverUrl == null ||
+                                            coverUrl.isEmpty) {
+                                          return Image.asset(
+                                            'assets/images/Artboard 1.png',
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                            fit: BoxFit.cover,
+                                            alignment: Alignment(0.0, 0.0),
+                                          );
+                                        }
+                                        return Image.network(
+                                          coverUrl,
+                                          width: double.infinity,
+                                          height: double.infinity,
+                                          fit: BoxFit.cover,
+                                          alignment: Alignment(0.0, 0.0),
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  Image.asset(
+                                            'assets/images/Artboard 1.png',
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                            fit: BoxFit.cover,
+                                            alignment: Alignment(0.0, 0.0),
+                                          ),
+                                        );
+                                      },
                                     ),
                                   ),
                                 ),
@@ -435,12 +457,12 @@ class _MovieDetailsWidgetState extends State<MovieDetailsWidget> {
                                                                   child:
                                                                       ConfirmacaoDeAlugarFilmeWidget(
                                                                     movieId:
-                                                                        movieDetailsMoviesRow!
-                                                                            .id,
+                                                                        movieDetailsMoviesRow
+                                                                            ?.id,
                                                                     userid:
                                                                         currentUserUid,
                                                                     valor: movieDetailsMoviesRow
-                                                                        .rentalPrice,
+                                                                        ?.rentalPrice,
                                                                   ),
                                                                 ),
                                                               ),
@@ -1191,15 +1213,31 @@ class _MovieDetailsWidgetState extends State<MovieDetailsWidget> {
                                           rowMoviesRowList.length, (rowIndex) {
                                     final rowMoviesRow =
                                         rowMoviesRowList[rowIndex];
-                                    return MovieItemWidget(
-                                      key: Key(
-                                          'Keyad6_${rowIndex}_of_${rowMoviesRowList.length}'),
-                                      poster: movieDetailsMoviesRow!.coverUrl!,
-                                      ratings: movieDetailsMoviesRow
-                                          .ratingCount
-                                          .toDouble(),
-                                      movieId: movieDetailsMoviesRow.id,
-                                      isRatingVisible: false,
+                                    return InkWell(
+                                      splashColor: Colors.transparent,
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                      onTap: () async {
+                                        context.pushNamed(
+                                          MovieDetailsWidget.routeName,
+                                          queryParameters: {
+                                            'movieId': serializeParam(
+                                              rowMoviesRow.id,
+                                              ParamType.int,
+                                            ),
+                                          }.withoutNulls,
+                                        );
+                                      },
+                                      child: MovieItemWidget(
+                                        key: Key(
+                                            'Keyad6_${rowIndex}_of_${rowMoviesRowList.length}'),
+                                        poster: rowMoviesRow.coverUrl!,
+                                        ratings:
+                                            rowMoviesRow.ratingCount.toDouble(),
+                                        movieId: rowMoviesRow.id,
+                                        isRatingVisible: false,
+                                      ),
                                     );
                                   })
                                       .divide(SizedBox(width: 10.0))

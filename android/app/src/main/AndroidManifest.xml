@@ -10,7 +10,7 @@
     <application
         android:label="Setmov"
         tools:replace="android:label"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/launcher_icon"
         android:requestLegacyExternalStorage="true">
 
         <activity
@@ -49,6 +49,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="setmov" android:host="setmov.com" />
+                <data android:scheme="setmov" android:host="setmov.com.br" />
             </intent-filter>
 
         </activity>

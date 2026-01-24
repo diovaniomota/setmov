@@ -3,6 +3,7 @@ import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_toggle_icon.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/custom_functions.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -115,13 +116,28 @@ class _FeedCardWidgetState extends State<FeedCardWidget> {
                 },
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
-                  child: Image.network(
-                    valueOrDefault<String>(
-                      '${widget.urlMovie}',
-                      'https://supabase.konexapp.com.br/storage/v1/object/sign/storagesetmovie/capa/Artboard%201.png?token=eyJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzdG9yYWdlc2V0bW92aWUvY2FwYS9BcnRib2FyZCAxLnBuZyIsImlhdCI6MTc1NzM0NTE1MiwiZXhwIjo0OTEwOTQ1MTUyfQ.Qn9q4oTyv0EX7RfLwkmTFA9so-FWO5bdT-AYbx2V_dw',
-                    ),
-                    width: 96.0,
-                    fit: BoxFit.cover,
+                  child: Builder(
+                    builder: (context) {
+                      final urlMovie = widget.urlMovie;
+                      if (urlMovie == null || urlMovie.isEmpty) {
+                        return Image.asset(
+                          'assets/images/Artboard 1.png',
+                          width: 96.0,
+                          fit: BoxFit.cover,
+                        );
+                      }
+                      return Image.network(
+                        urlMovie,
+                        width: 96.0,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            Image.asset(
+                          'assets/images/Artboard 1.png',
+                          width: 96.0,
+                          fit: BoxFit.cover,
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
@@ -176,12 +192,25 @@ class _FeedCardWidgetState extends State<FeedCardWidget> {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                               ),
-                              child: Image.network(
-                                valueOrDefault<String>(
-                                  rowUsersRow?.imagemPerfil,
-                                  'https://supabase.konexapp.com.br/storage/v1/object/sign/storagesetmovie/avatar/4.png?token=eyJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzdG9yYWdlc2V0bW92aWUvYXZhdGFyLzQucG5nIiwiaWF0IjoxNzU4NzEzNjEzLCJleHAiOjQ5MTIzMTM2MTN9.J54Igz3BhBOWpLp8dMZXuuD2EiVFI_8VIz3s3r9ubBI',
-                                ),
-                                fit: BoxFit.cover,
+                              child: Builder(
+                                builder: (context) {
+                                  return Image.network(
+                                    getAvatarPath(
+                                      rowUsersRow?.imagemPerfil,
+                                      rowUsersRow?.id,
+                                    ),
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            Image.asset(
+                                      getAvatarPath(
+                                        null,
+                                        rowUsersRow?.id,
+                                      ),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                             InkWell(

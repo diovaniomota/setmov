@@ -86,7 +86,12 @@ class _SuccessDialogWidgetState extends State<SuccessDialogWidget> {
                   ),
                   child: Padding(
                     padding: EdgeInsets.all(30.0),
-                    child: widget.successIcon!,
+                    child: widget.successIcon ??
+                        Icon(
+                          Icons.check,
+                          color: Colors.white,
+                          size: 30.0,
+                        ),
                   ),
                 ),
               ),
@@ -132,7 +137,10 @@ class _SuccessDialogWidgetState extends State<SuccessDialogWidget> {
                 onPressed: () async {
                   await widget.doneAction?.call();
                 },
-                text: widget.doneText!,
+                text: valueOrDefault<String>(
+                  widget.doneText,
+                  'Fechar',
+                ),
                 options: FFButtonOptions(
                   width: double.infinity,
                   height: 50.0,

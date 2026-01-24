@@ -238,25 +238,44 @@ class _ProfileEditWidgetState extends State<ProfileEditWidget> {
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                     ),
-                                    child: Image.network(
-                                      valueOrDefault<String>(
-                                        () {
-                                          if (columnUsersRow?.imagemPerfil !=
-                                                  null &&
-                                              columnUsersRow?.imagemPerfil !=
-                                                  '') {
-                                            return columnUsersRow?.imagemPerfil;
-                                          } else if (_model.uploadedFileUrl_atualizarFoto !=
-                                                  '') {
-                                            return _model
-                                                .uploadedFileUrl_atualizarFoto;
-                                          } else {
-                                            return 'https://supabase.konexapp.com.br/storage/v1/object/sign/storagesetmovie/avatar/4.png?token=eyJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzdG9yYWdlc2V0bW92aWUvYXZhdGFyLzQucG5nIiwiaWF0IjoxNzU4NzEzNjEzLCJleHAiOjQ5MTIzMTM2MTN9.J54Igz3BhBOWpLp8dMZXuuD2EiVFI_8VIz3s3r9ubBI';
-                                          }
-                                        }(),
-                                        'https://supabase.konexapp.com.br/storage/v1/object/sign/storagesetmovie/avatar/4.png?token=eyJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzdG9yYWdlc2V0bW92aWUvYXZhdGFyLzQucG5nIiwiaWF0IjoxNzU4NzEzNjEzLCJleHAiOjQ5MTIzMTM2MTN9.J54Igz3BhBOWpLp8dMZXuuD2EiVFI_8VIz3s3r9ubBI',
-                                      ),
-                                      fit: BoxFit.cover,
+                                    child: Builder(
+                                      builder: (context) {
+                                        final imagemPerfil =
+                                            columnUsersRow?.imagemPerfil;
+                                        final uploadedUrl = _model
+                                            .uploadedFileUrl_atualizarFoto;
+                                        final avatarIndex =
+                                            (((currentUserUid.hashCode) % 10)
+                                                        .abs() +
+                                                    2)
+                                                .toString();
+
+                                        final effectiveUrl =
+                                            (imagemPerfil != null &&
+                                                    imagemPerfil.isNotEmpty)
+                                                ? imagemPerfil
+                                                : (uploadedUrl.isNotEmpty
+                                                    ? uploadedUrl
+                                                    : null);
+
+                                        if (effectiveUrl == null) {
+                                          return Image.asset(
+                                            'assets/images/$avatarIndex.png',
+                                            fit: BoxFit.cover,
+                                          );
+                                        }
+
+                                        return Image.network(
+                                          effectiveUrl,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  Image.asset(
+                                            'assets/images/$avatarIndex.png',
+                                            fit: BoxFit.cover,
+                                          ),
+                                        );
+                                      },
                                     ),
                                   ),
                                 ),
@@ -899,7 +918,7 @@ class _ProfileEditWidgetState extends State<ProfileEditWidget> {
                           ),
                         );
                         context.safePop();
-                      
+
                         safeSetState(() {});
                       },
                       text: 'Salvar',

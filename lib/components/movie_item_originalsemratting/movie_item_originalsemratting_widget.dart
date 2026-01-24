@@ -78,7 +78,7 @@ class _MovieItemOriginalsemrattingWidgetState
               child: Image.network(
                 valueOrDefault<String>(
                   widget.poster,
-                  'https://supabase.konexapp.com.br/storage/v1/object/sign/storagesetmovie/capa/Artboard%201.png?token=eyJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzdG9yYWdlc2V0bW92aWUvY2FwYS9BcnRib2FyZCAxLnBuZyIsImlhdCI6MTc1NzM0NTE1MiwiZXhwIjo0OTEwOTQ1MTUyfQ.Qn9q4oTyv0EX7RfLwkmTFA9so-FWO5bdT-AYbx2V_dw',
+                  'https://hwkkrylnqyoerpaiujfq.supabase.co/storage/v1/object/public/storagesetmovie/capa/Artboard%201.png',
                 ),
                 width: 154.0,
                 height: 208.0,

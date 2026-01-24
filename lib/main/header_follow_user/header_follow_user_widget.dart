@@ -2,6 +2,7 @@ import '/auth/supabase_auth/auth_util.dart';
 import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/custom_functions.dart';
 import '/index.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -139,12 +140,24 @@ class _HeaderFollowUserWidgetState extends State<HeaderFollowUserWidget> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                           ),
-                          child: Image.network(
-                            valueOrDefault<String>(
-                              rowUsersRow?.imagemPerfil,
-                              'https://supabase.konexapp.com.br/storage/v1/object/sign/storagesetmovie/avatar/4.png?token=eyJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzdG9yYWdlc2V0bW92aWUvYXZhdGFyLzQucG5nIiwiaWF0IjoxNzU4NzEzNjEzLCJleHAiOjQ5MTIzMTM2MTN9.J54Igz3BhBOWpLp8dMZXuuD2EiVFI_8VIz3s3r9ubBI',
-                            ),
-                            fit: BoxFit.cover,
+                          child: Builder(
+                            builder: (context) {
+                              return Image.network(
+                                getAvatarPath(
+                                  rowUsersRow?.imagemPerfil,
+                                  rowUsersRow?.id,
+                                ),
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Image.asset(
+                                  getAvatarPath(
+                                    null,
+                                    rowUsersRow?.id,
+                                  ),
+                                  fit: BoxFit.cover,
+                                ),
+                              );
+                            },
                           ),
                         ),
                       ),
@@ -204,11 +217,6 @@ class _HeaderFollowUserWidgetState extends State<HeaderFollowUserWidget> {
                     }
                     List<UserFollowsRow> conditionalBuilderUserFollowsRowList =
                         snapshot.data!;
-
-                    final conditionalBuilderUserFollowsRow =
-                        conditionalBuilderUserFollowsRowList.isNotEmpty
-                            ? conditionalBuilderUserFollowsRowList.first
-                            : null;
 
                     return Builder(
                       builder: (context) {

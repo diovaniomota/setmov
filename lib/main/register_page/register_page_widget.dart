@@ -1,5 +1,4 @@
-import '/auth/supabase_auth/auth_util.dart';
-import '/backend/supabase/supabase.dart';
+import '/custom_code/actions/index.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -1172,35 +1171,27 @@ class _RegisterPageWidgetState extends State<RegisterPageWidget> {
                                   return;
                                 }
 
-                                final user =
-                                    await authManager.createAccountWithEmail(
-                                  context,
+                                final success = await registerUserWithSupabase(
                                   _model.tFEmailTextController.text,
                                   _model.tFSenhaTextController.text,
+                                  _model.tFNomeTextController.text,
+                                  _model.tFSobrenomeTextController.text,
+                                  _model.tFTelefoneTextController.text,
+                                  _model.datePicked ?? getCurrentTimestamp,
                                 );
-                                if (user == null) {
+                                if (!success) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Erro ao criar conta. Verifique os dados e tente novamente.',
+                                      ),
+                                    ),
+                                  );
                                   return;
                                 }
 
-                                await UsersTable().update(
-                                  data: {
-                                    'first_name':
-                                        _model.tFNomeTextController.text,
-                                    'last_name':
-                                        _model.tFSobrenomeTextController.text,
-                                    'phone':
-                                        _model.tFTelefoneTextController.text,
-                                    'date_of_birth':
-                                        _model.datePicked?.toString(),
-                                  },
-                                  matchingRows: (rows) => rows.eqOrNull(
-                                    'id',
-                                    currentUserUid,
-                                  ),
-                                );
-
                                 context.goNamedAuth(
-                                    HomeWidget.routeName, context.mounted);
+                                    ProfileSetUpWidget.routeName, context.mounted);
                               }
 
                               safeSetState(() {});

@@ -5,6 +5,7 @@ import '/components/recent_movie_item/recent_movie_item_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/flutter_flow/custom_functions.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -100,10 +101,23 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                           topRight: Radius.circular(50.0),
                         ),
                         child: Image.network(
-                          profileUsersRow!.imagemPerfil!,
+                          getAvatarPath(
+                            profileUsersRow?.imagemPerfil,
+                            currentUserUid,
+                          ),
                           width: 40.0,
                           height: 40.0,
                           fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Image.asset(
+                            getAvatarPath(
+                              null,
+                              currentUserUid,
+                            ),
+                            width: 40.0,
+                            height: 40.0,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                       Text(
@@ -196,8 +210,20 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                       shape: BoxShape.circle,
                                     ),
                                     child: Image.network(
-                                      'https://images.unsplash.com/photo-1511367461989-f85a21fda167?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHwxOHx8cHJvZmlsZSUyMGljb258ZW58MHx8fHwxNzI4MjIxODk5fDA&ixlib=rb-4.0.3&q=80&w=1080',
+                                      getAvatarPath(
+                                        profileUsersRow?.imagemPerfil,
+                                        currentUserUid,
+                                      ),
                                       fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              Image.asset(
+                                        getAvatarPath(
+                                          null,
+                                          currentUserUid,
+                                        ),
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
                                   ),
                                   Flexible(
@@ -210,7 +236,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                       children: [
                                         Text(
                                           valueOrDefault<String>(
-                                            profileUsersRow.firstName,
+                                            profileUsersRow?.firstName,
                                             'Name',
                                           ),
                                           style: FlutterFlowTheme.of(context)
@@ -235,7 +261,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                                         ),
                                         Text(
                                           valueOrDefault<String>(
-                                            profileUsersRow.email,
+                                            profileUsersRow?.email,
                                             'Email',
                                           ),
                                           style: FlutterFlowTheme.of(context)

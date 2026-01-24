@@ -43,6 +43,16 @@
         <string>setmov</string>
         </array>
         </dict>
+        <dict>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>CFBundleURLName</key>
+        <string>setmov.com.br</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+        <string>setmov</string>
+        </array>
+        </dict>
     </array>
     <key>FlutterDeepLinkingEnabled</key>
     <true/>

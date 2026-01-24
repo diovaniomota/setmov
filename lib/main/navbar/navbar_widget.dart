@@ -207,12 +207,31 @@ class _NavbarWidgetState extends State<NavbarWidget> {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                               ),
-                              child: Image.network(
-                                valueOrDefault<String>(
-                                  circleImageUsersRow?.imagemPerfil,
-                                  'https://supabase.konexapp.com.br/storage/v1/object/sign/storagesetmovie/avatar/4.png?token=eyJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzdG9yYWdlc2V0bW92aWUvYXZhdGFyLzQucG5nIiwiaWF0IjoxNzU4NzEzNjEzLCJleHAiOjQ5MTIzMTM2MTN9.J54Igz3BhBOWpLp8dMZXuuD2EiVFI_8VIz3s3r9ubBI',
-                                ),
-                                fit: BoxFit.cover,
+                              child: Builder(
+                                builder: (context) {
+                                  final imagemPerfil =
+                                      circleImageUsersRow?.imagemPerfil;
+                                  final avatarIndex =
+                                      (((currentUserUid.hashCode) % 10).abs() + 2)
+                                          .toString();
+                                  if (imagemPerfil == null ||
+                                      imagemPerfil.isEmpty) {
+                                    return Image.asset(
+                                      'assets/images/$avatarIndex.png',
+                                      fit: BoxFit.cover,
+                                    );
+                                  }
+                                  return Image.network(
+                                    imagemPerfil,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            Image.asset(
+                                      'assets/images/$avatarIndex.png',
+                                      fit: BoxFit.cover,
+                                    ),
+                                  );
+                                },
                               ),
                             );
                           },

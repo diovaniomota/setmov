@@ -8,7 +8,6 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/random_data_util.dart' as random_data;
 import '/index.dart';
-import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:webviewx_plus/webviewx_plus.dart';
@@ -193,18 +192,13 @@ class _PaymentSummaryCopyCopyWidgetState
                                   child: TextFormField(
                                     controller: _model.textController,
                                     focusNode: _model.textFieldFocusNode,
-                                    onChanged: (_) => EasyDebounce.debounce(
-                                      '_model.textController',
-                                      Duration(milliseconds: 2000),
-                                      () async {
-                                        _model.valor =
-                                            _model.textController.text;
-                                        _model.tax = '1.99';
-                                        _model.valorint = int.tryParse(
-                                            _model.textController.text);
-                                        safeSetState(() {});
-                                      },
-                                    ),
+                                    onChanged: (_) {
+                                      _model.valor = _model.textController.text;
+                                      _model.tax = '1.99';
+                                      _model.valorint = int.tryParse(
+                                          _model.textController.text);
+                                      safeSetState(() {});
+                                    },
                                     autofocus: false,
                                     obscureText: false,
                                     decoration: InputDecoration(
@@ -666,21 +660,29 @@ class _PaymentSummaryCopyCopyWidgetState
                                     .linkURL(
                                   (_model.linkCheckout?.jsonBody ?? ''),
                                 )!);
-                                await Future.delayed(
-                                  Duration(
-                                    milliseconds: 20000,
-                                  ),
-                                );
-                                _model.statusPagamentoWallet =
-                                    await PaymentConfirmationTable().queryRows(
-                                  queryFn: (q) => q.eqOrNull(
-                                    'stripe_payment_intent_id',
-                                    _model.numeroAleatorio,
-                                  ),
-                                );
-                                if (_model.statusPagamentoWallet?.firstOrNull
-                                        ?.status ==
-                                    'succeeded') {
+                                int retryCountWalletValue = 0;
+                                bool paymentSucceededWallet = false;
+                                while (retryCountWalletValue < 30 &&
+                                    !paymentSucceededWallet) {
+                                  await Future.delayed(
+                                      Duration(milliseconds: 2000));
+                                  if (!mounted) return;
+                                  _model.statusPagamentoWallet =
+                                      await PaymentConfirmationTable()
+                                          .queryRows(
+                                    queryFn: (q) => q.eqOrNull(
+                                      'stripe_payment_intent_id',
+                                      _model.numeroAleatorio,
+                                    ),
+                                  );
+                                  if (_model.statusPagamentoWallet?.firstOrNull
+                                          ?.status ==
+                                      'succeeded') {
+                                    paymentSucceededWallet = true;
+                                  }
+                                  retryCountWalletValue++;
+                                }
+                                if (paymentSucceededWallet) {
                                   safeSetState(() {
                                     _model.textController?.clear();
                                   });
@@ -831,21 +833,29 @@ class _PaymentSummaryCopyCopyWidgetState
                                     .linkURL(
                                   (_model.linkCheckoutWallet?.jsonBody ?? ''),
                                 )!);
-                                await Future.delayed(
-                                  Duration(
-                                    milliseconds: 20000,
-                                  ),
-                                );
-                                _model.statusPagamento =
-                                    await PaymentConfirmationTable().queryRows(
-                                  queryFn: (q) => q.eqOrNull(
-                                    'stripe_payment_intent_id',
-                                    _model.numeroAleatorio,
-                                  ),
-                                );
-                                if (_model
-                                        .statusPagamento?.firstOrNull?.status ==
-                                    'succeeded') {
+                                int retryCountValue = 0;
+                                bool paymentSucceeded = false;
+                                while (retryCountValue < 30 &&
+                                    !paymentSucceeded) {
+                                  await Future.delayed(
+                                      Duration(milliseconds: 2000));
+                                  if (!mounted) return;
+                                  _model.statusPagamento =
+                                      await PaymentConfirmationTable()
+                                          .queryRows(
+                                    queryFn: (q) => q.eqOrNull(
+                                      'stripe_payment_intent_id',
+                                      _model.numeroAleatorio,
+                                    ),
+                                  );
+                                  if (_model.statusPagamento?.firstOrNull
+                                          ?.status ==
+                                      'succeeded') {
+                                    paymentSucceeded = true;
+                                  }
+                                  retryCountValue++;
+                                }
+                                if (paymentSucceeded) {
                                   safeSetState(() {
                                     _model.textController?.clear();
                                   });

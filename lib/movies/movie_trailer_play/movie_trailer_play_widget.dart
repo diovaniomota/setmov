@@ -2,6 +2,7 @@ import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_web_view.dart';
+import '/flutter_flow/flutter_flow_video_player.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -103,7 +104,7 @@ class _MovieTrailerPlayWidgetState extends State<MovieTrailerPlayWidget> {
                           child: Image.network(
                             valueOrDefault<String>(
                               movieTrailerPlayMoviesRow?.coverUrl,
-                              'https://supabase.konexapp.com.br/storage/v1/object/sign/storagesetmovie/capa/Artboard%201.png?token=eyJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzdG9yYWdlc2V0bW92aWUvY2FwYS9BcnRib2FyZCAxLnBuZyIsImlhdCI6MTc1NzM0NTE1MiwiZXhwIjo0OTEwOTQ1MTUyfQ.Qn9q4oTyv0EX7RfLwkmTFA9so-FWO5bdT-AYbx2V_dw',
+                              'https://hwkkrylnqyoerpaiujfq.supabase.co/storage/v1/object/public/storagesetmovie/capa/Artboard%201.png',
                             ),
                             width: double.infinity,
                             height: double.infinity,
@@ -196,17 +197,71 @@ class _MovieTrailerPlayWidgetState extends State<MovieTrailerPlayWidget> {
                           Expanded(
                             child: Align(
                               alignment: AlignmentDirectional(0.0, 0.0),
-                              child: FlutterFlowWebView(
-                                content: valueOrDefault<String>(
-                                  movieTrailerPlayMoviesRow?.trailerUrl,
-                                  'Não há',
-                                ),
-                                width: MediaQuery.sizeOf(context).width * 1.0,
-                                height: MediaQuery.sizeOf(context).height * 0.3,
-                                verticalScroll: false,
-                                horizontalScroll: false,
-                                html: true,
-                              ),
+                              child: Builder(builder: (context) {
+                                final trailerUrl =
+                                    movieTrailerPlayMoviesRow?.trailerUrl ?? '';
+                                final isHtml = trailerUrl.trim().startsWith('<');
+                                final isDirectLink = trailerUrl
+                                        .toLowerCase()
+                                        .contains('.mp4') ||
+                                    trailerUrl.toLowerCase().contains('.mov') ||
+                                    trailerUrl.contains('supabase.co');
+
+                                if (trailerUrl == 'Não há' ||
+                                    trailerUrl.isEmpty) {
+                                  return Text(
+                                    'Trailer indisponível',
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          font: GoogleFonts.roboto(),
+                                          color:
+                                              FlutterFlowTheme.of(context).info,
+                                        ),
+                                  );
+                                }
+
+                                if (isHtml) {
+                                  return FlutterFlowWebView(
+                                    content: trailerUrl,
+                                    width:
+                                        MediaQuery.sizeOf(context).width * 1.0,
+                                    height:
+                                        MediaQuery.sizeOf(context).height * 0.3,
+                                    verticalScroll: false,
+                                    horizontalScroll: false,
+                                    html: true,
+                                  );
+                                }
+
+                                if (isDirectLink) {
+                                  return FlutterFlowVideoPlayer(
+                                    path: Uri.encodeFull(trailerUrl),
+                                    videoType: VideoType.network,
+                                    width:
+                                        MediaQuery.sizeOf(context).width * 1.0,
+                                    height:
+                                        MediaQuery.sizeOf(context).height * 0.3,
+                                    autoPlay: true,
+                                    looping: false,
+                                    showControls: true,
+                                    allowFullScreen: true,
+                                    allowPlaybackSpeedMenu: false,
+                                    lazyLoad: false,
+                                  );
+                                }
+
+                                // Default to WebView for other links (YouTube, etc.)
+                                return FlutterFlowWebView(
+                                  content: trailerUrl,
+                                  width: MediaQuery.sizeOf(context).width * 1.0,
+                                  height:
+                                      MediaQuery.sizeOf(context).height * 0.3,
+                                  verticalScroll: false,
+                                  horizontalScroll: false,
+                                  html: false,
+                                );
+                              }),
                             ),
                           ),
                           ClipRRect(
