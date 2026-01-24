@@ -72,8 +72,6 @@ class _MyAppState extends State<MyApp> {
           .map((e) => getRoute(e))
           .toList();
   late Stream<BaseAuthUser> userStream;
-  late AppLinks _appLinks;
-  StreamSubscription<Uri>? _linkSubscription;
 
   @override
   void initState() {
@@ -90,79 +88,6 @@ class _MyAppState extends State<MyApp> {
       Duration(milliseconds: 1000),
       () => _appStateNotifier.stopShowingSplashImage(),
     );
-
-    // Initialize AppLinks
-    _appLinks = AppLinks();
-    _handleIncomingLinks();
-  }
-
-  void _handleIncomingLinks() {
-    // Handle deep links when the app is launched from a cold start
-    _appLinks.getInitialLink().then((uri) {
-      if (uri != null) {
-        _navigateToUri(uri);
-      }
-    });
-
-    // Handle deep links when the app is running in the background
-    _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
-      if (mounted) {
-        _navigateToUri(uri);
-      }
-    });
-  }
-
-  void _navigateToUri(Uri uri) async {
-    // Feedback visual imediato
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Recebido: ${uri.toString()}'),
-        duration: Duration(seconds: 4),
-        backgroundColor: Colors.blue,
-      ),
-    );
-
-    await Future.delayed(
-        Duration(milliseconds: 500)); // Delay para garantir estabilidade
-
-    String location = uri.path;
-
-    // Handle cases where the path might be in the host
-    if (location.isEmpty && uri.host.isNotEmpty && uri.host != 'app') {
-      location = uri.host;
-    } else if (uri.host == 'app' && location.isNotEmpty) {
-      // Normal behavior for setmov://app/path
-    }
-
-    if (location.isEmpty) {
-      return;
-    }
-
-    // Ensure it starts with /
-    if (!location.startsWith('/')) {
-      location = '/$location';
-    }
-
-    if (uri.hasQuery) {
-      location += '?${uri.query}';
-    }
-
-    try {
-      _router.go(location);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erro ao navegar: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    _linkSubscription?.cancel();
-    super.dispose();
   }
 
   void setLocale(String language) {
