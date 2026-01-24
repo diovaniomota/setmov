@@ -51,6 +51,8 @@
                 <data android:scheme="setmov" android:host="setmov.com" />
                 <data android:scheme="setmov" android:host="setmov.com.br" />
                 <data android:scheme="setmov" android:host="app" />
+                <data android:scheme="https" android:host="setmov.com" />
+                <data android:scheme="https" android:host="www.setmov.com" />
             </intent-filter>
 
         </activity>
