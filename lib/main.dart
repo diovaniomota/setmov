@@ -84,10 +84,18 @@ class _MyAppState extends State<MyApp> {
         _appStateNotifier.update(user);
       });
     jwtTokenStream.listen((_) {});
-    Future.delayed(
-      Duration(milliseconds: 1000),
-      () => _appStateNotifier.stopShowingSplashImage(),
-    );
+    // Initialize AppLinks
+    final appLinks = AppLinks();
+    appLinks.getInitialLink().then((uri) {
+      if (uri != null) {
+        _appStateNotifier.stopShowingSplashImage(); // Pula splash se tiver link
+      } else {
+        Future.delayed(
+          Duration(milliseconds: 1000),
+          () => _appStateNotifier.stopShowingSplashImage(),
+        );
+      }
+    });
   }
 
   void setLocale(String language) {
