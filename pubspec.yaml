@@ -160,6 +160,7 @@ flutter_launcher_icons:
   web:
     generate: true
   image_path: 'assets/images/image_(47).png'
+  image_path_ios: 'assets/images/ios_bg.png'
   adaptive_icon_background: '#6503ad'
   adaptive_icon_foreground: 'assets/images/image_(47).png'
 
