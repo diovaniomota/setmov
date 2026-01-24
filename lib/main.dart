@@ -112,12 +112,26 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  void _navigateToUri(Uri uri) {
+  void _navigateToUri(Uri uri) async {
+    // Feedback visual imediato
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Recebido: ${uri.toString()}'),
+        duration: Duration(seconds: 4),
+        backgroundColor: Colors.blue,
+      ),
+    );
+
+    await Future.delayed(
+        Duration(milliseconds: 500)); // Delay para garantir estabilidade
+
     String location = uri.path;
 
-    // Handle cases where the path might be in the host (e.g. setmov://paymentSummaryCopy)
-    if (location.isEmpty && uri.host.isNotEmpty) {
+    // Handle cases where the path might be in the host
+    if (location.isEmpty && uri.host.isNotEmpty && uri.host != 'app') {
       location = uri.host;
+    } else if (uri.host == 'app' && location.isNotEmpty) {
+      // Normal behavior for setmov://app/path
     }
 
     if (location.isEmpty) {
@@ -133,16 +147,16 @@ class _MyAppState extends State<MyApp> {
       location += '?${uri.query}';
     }
 
-    // Feedback visual para debug e UX
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Processando pagamento...'),
-        duration: Duration(seconds: 2),
-        backgroundColor: FlutterFlowTheme.of(context).primary,
-      ),
-    );
-
-    _router.go(location);
+    try {
+      _router.go(location);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao navegar: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
