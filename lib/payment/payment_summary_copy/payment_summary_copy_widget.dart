@@ -850,9 +850,9 @@ class _PaymentSummaryCopyWidgetState extends State<PaymentSummaryCopyWidget> {
                                 coins: _model.valor,
                                 number: _model.numeroAleatorio,
                                 successUrl:
-                                    'setmov://setmov.com/paymentSummaryCopy?payment_status=success',
+                                    'setmov://app/paymentSummaryCopy?payment_status=success',
                                 cancelUrl:
-                                    'setmov://setmov.com/paymentSummaryCopy?payment_status=cancel',
+                                    'setmov://app/paymentSummaryCopy?payment_status=cancel',
                               );
 
                               if ((_model.linkCheckoutWallet?.succeeded ??
