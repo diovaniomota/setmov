@@ -50,6 +50,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="setmov" android:host="setmov.com" />
                 <data android:scheme="setmov" android:host="setmov.com.br" />
+                <data android:scheme="setmov" android:host="app" />
             </intent-filter>
 
         </activity>
