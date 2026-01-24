@@ -71,6 +71,8 @@ class _MyAppState extends State<MyApp> {
           .map((e) => getRoute(e))
           .toList();
   late Stream<BaseAuthUser> userStream;
+  late AppLinks _appLinks;
+  StreamSubscription<Uri>? _linkSubscription;
 
   @override
   void initState() {
@@ -87,6 +89,40 @@ class _MyAppState extends State<MyApp> {
       Duration(milliseconds: 1000),
       () => _appStateNotifier.stopShowingSplashImage(),
     );
+
+    // Initialize AppLinks
+    _appLinks = AppLinks();
+    _handleIncomingLinks();
+  }
+
+  void _handleIncomingLinks() {
+    // Handle deep links when the app is launched from a cold start
+    _appLinks.getInitialLink().then((uri) {
+      if (uri != null) {
+        _navigateToUri(uri);
+      }
+    });
+
+    // Handle deep links when the app is running in the background
+    _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
+      if (mounted) {
+        _navigateToUri(uri);
+      }
+    });
+  }
+
+  void _navigateToUri(Uri uri) {
+    String location = uri.path;
+    if (uri.hasQuery) {
+      location += '?${uri.query}';
+    }
+    _router.go(location);
+  }
+
+  @override
+  void dispose() {
+    _linkSubscription?.cancel();
+    super.dispose();
   }
 
   void setLocale(String language) {
