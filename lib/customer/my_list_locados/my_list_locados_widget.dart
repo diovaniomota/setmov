@@ -239,7 +239,7 @@ class _MyListLocadosWidgetState extends State<MyListLocadosWidget> {
                                 .toList();
                             if (movieIds.isEmpty) return <MoviesRow>[];
                             return await MoviesTable().queryRows(
-                              queryFn: (q) => q.in_('id', movieIds),
+                              queryFn: (q) => q.filter('id', 'in', movieIds),
                             );
                           }),
                           builder: (context, snapshot) {
