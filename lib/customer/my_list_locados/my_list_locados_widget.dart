@@ -221,14 +221,27 @@ class _MyListLocadosWidgetState extends State<MyListLocadosWidget> {
                       Container(
                         width: double.infinity,
                         decoration: BoxDecoration(),
-                        child: FutureBuilder<List<UserFavoriteMoviesRow>>(
-                          future: UserFavoriteMoviesTable().queryRows(
-                            queryFn: (q) => q.eqOrNull(
-                              'user_id',
-                              currentUserUid,
+                        child: FutureBuilder<List<MoviesRow>>(
+                          future: Future.wait([
+                            MovieRentalsTable().queryRows(
+                              queryFn: (q) => q
+                                  .eqOrNull('user_id', currentUserUid)
+                                  .gt('expires_at',
+                                      supaSerialize<DateTime>(DateTime.now()))
+                                  .order('rented_at', ascending: false),
                             ),
-                            limit: 100,
-                          ),
+                          ]).then((results) async {
+                            final rentals = results[0] as List<MovieRentalsRow>;
+                            if (rentals.isEmpty) return <MoviesRow>[];
+                            final movieIds = rentals
+                                .map((r) => r.movieId)
+                                .where((id) => id != null)
+                                .toList();
+                            if (movieIds.isEmpty) return <MoviesRow>[];
+                            return await MoviesTable().queryRows(
+                              queryFn: (q) => q.in_('id', movieIds),
+                            );
+                          }),
                           builder: (context, snapshot) {
                             // Customize what your widget looks like when it's loading.
                             if (!snapshot.hasData) {
@@ -244,8 +257,7 @@ class _MyListLocadosWidgetState extends State<MyListLocadosWidget> {
                                 ),
                               );
                             }
-                            List<UserFavoriteMoviesRow>
-                                wrapUserFavoriteMoviesRowList = snapshot.data!;
+                            List<MoviesRow> wrapMoviesRowList = snapshot.data!;
 
                             return Wrap(
                               spacing: 12.0,
@@ -256,15 +268,14 @@ class _MyListLocadosWidgetState extends State<MyListLocadosWidget> {
                               runAlignment: WrapAlignment.start,
                               verticalDirection: VerticalDirection.down,
                               clipBehavior: Clip.none,
-                              children: List.generate(
-                                  wrapUserFavoriteMoviesRowList.length,
+                              children: List.generate(wrapMoviesRowList.length,
                                   (wrapIndex) {
-                                final wrapUserFavoriteMoviesRow =
-                                    wrapUserFavoriteMoviesRowList[wrapIndex];
+                                final wrapMoviesRow =
+                                    wrapMoviesRowList[wrapIndex];
                                 return MovieItem2Widget(
                                   key: Key(
-                                      'Keygs3_${wrapIndex}_of_${wrapUserFavoriteMoviesRowList.length}'),
-                                  poster: wrapUserFavoriteMoviesRow.coverUrl!,
+                                      'Keygs3_${wrapIndex}_of_${wrapMoviesRowList.length}'),
+                                  poster: wrapMoviesRow.coverUrl!,
                                   ratings: 9.2,
                                 );
                               }),

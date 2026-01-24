@@ -279,7 +279,9 @@ class _MoviePlayWidgetState extends State<MoviePlayWidget> {
                                         .toLowerCase()
                                         .contains('.mp4') ||
                                     streamUrl.toLowerCase().contains('.mov') ||
-                                    streamUrl.contains('supabase.co');
+                                    streamUrl.toLowerCase().contains('.m3u8') ||
+                                    streamUrl.contains('supabase.co') ||
+                                    streamUrl.contains('storage.googleapis.com');
 
                                 if (streamUrl == 'Não há' ||
                                     streamUrl.isEmpty) {
