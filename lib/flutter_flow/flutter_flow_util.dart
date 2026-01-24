@@ -197,7 +197,7 @@ Theme wrapInMaterialTimePickerTheme(
 Future launchURL(String url) async {
   var uri = Uri.parse(url);
   try {
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
+    await launchUrl(uri);
   } catch (e) {
     throw 'Could not launch $uri: $e';
   }
